@@ -10,7 +10,7 @@ public class TesteController : ControllerBase
     public IActionResult GetFile()
     {
         // Caminho para o arquivo PDF no servidor
-        string pdfFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "INGRESSOLAGUM.pdf");
+        string pdfFilePath = Path.Combine(Directory.GetCurrentDirectory(), "INGRESSOLAGUM.pdf");
 
         // Retorna o arquivo PDF
         return PhysicalFile(pdfFilePath, "application/pdf");
