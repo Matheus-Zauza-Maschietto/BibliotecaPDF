@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bibliotecaPDF", "bibliotecaPDF.csproj", "{606EF7E6-9509-437C-BA2E-55AE4FB3D8FA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{606EF7E6-9509-437C-BA2E-55AE4FB3D8FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{606EF7E6-9509-437C-BA2E-55AE4FB3D8FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{606EF7E6-9509-437C-BA2E-55AE4FB3D8FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{606EF7E6-9509-437C-BA2E-55AE4FB3D8FA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F6397F9D-9E5D-4454-8127-9E6AD7A44181}
+	EndGlobalSection
+EndGlobal
