@@ -14,8 +14,5 @@ public class TesteController : ControllerBase
 
         // Retorna o arquivo PDF
         return PhysicalFile(pdfFilePath, "application/pdf");
-        Task<int> teste(){
-            
-        } 
     }
 }

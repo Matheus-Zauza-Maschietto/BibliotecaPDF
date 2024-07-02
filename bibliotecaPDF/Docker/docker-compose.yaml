@@ -1,0 +1,31 @@
+version: "latest"
+services:
+  db:
+    container_name: "bibliotecaDB"
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - 1433:1433
+    environment:
+      - ACCEPT_EULA=true
+      - MSSQL_SA_PASSWORD=Senha123!
+    networks:
+      - "bibliotecaPDF"
+    volumes:
+      - "./db_volume:/var/opt/mssql/data"
+  
+  # app:
+  #   depends_on: 
+  #     - db
+  #   container_name: "bibliotecaAPI"
+  #   build: ./dockerfile
+  #   image: "./"
+  #   ports:
+  #     - 5090:5090
+  #   networks:
+  #     - "bibliotecaPDF"
+
+networks:
+  bibliotecaPDF:
+    driver:  bridge
+volumes:
+  db_volume:
