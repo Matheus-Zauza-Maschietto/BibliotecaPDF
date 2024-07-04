@@ -16,6 +16,7 @@ public class PdfFile
     public string FileName { get; set; }
     [Required]
     public byte[] Content { get; set; }
+    public bool IsFavorite { get; set; }
 
     public PdfFile()
     {

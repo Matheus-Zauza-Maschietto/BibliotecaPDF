@@ -1,4 +1,5 @@
 ﻿using bibliotecaPDF.Context;
+using bibliotecaPDF.Exceptions;
 using bibliotecaPDF.Models;
 using bibliotecaPDF.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +14,14 @@ public class FileRepository: IFileRepository
         _applicationContext = context;
     }
 
-    public async Task<PdfFile>? GetFileByName(string name, User user)
+    public async Task<PdfFile?> GetFileByName(string name, User user)
     {
-        return _applicationContext.PdfFile.AsNoTracking().FirstOrDefault(p => p.FileName == name && p.User.Id == user.Id);
+        PdfFile? file = await _applicationContext.PdfFile.AsNoTracking().FirstOrDefaultAsync(p => p.FileName == name && p.User.Id == user.Id);
+        if (file == null)
+        {
+            throw new NotFoundException("File Not Found.");
+        }
+        return file;
     }
 
     public async Task<List<string>> GetFilesByUser(User user)
@@ -34,10 +40,44 @@ public class FileRepository: IFileRepository
         PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == fileName && p.User.Id == user.Id);
         if(file is null)
         {
-            throw new Exception("Arquivo não encontrado.");
+            throw new NotFoundException("File Not Found.");
         }
         _applicationContext.PdfFile.Remove(file);
-        await _applicationContext.SaveChangesAsync();
+        _applicationContext.SaveChangesAsync();
+    }
+
+    public async Task SetFavoriteFileByName(string name, User user)
+    {
+        PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == name && p.User.Id == user.Id);
+        if (file is null)
+        {
+            throw new NotFoundException("File Not Found.");
+        }
+
+        if (file.IsFavorite == true)
+        {
+            return;
+        }
+
+        file.IsFavorite = true;
+        _applicationContext.SaveChangesAsync();
+    }
+
+    public async Task SetUnfavoriteFileByName(string name, User user)
+    {
+        PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == name && p.User.Id == user.Id);
+        if (file is null)
+        {
+            throw new NotFoundException("Arquivo não encontrado.");
+        }
+
+        if (file.IsFavorite == false)
+        {
+            return;
+        }
+
+        file.IsFavorite = false;
+        _applicationContext.SaveChangesAsync();
     }
 }
     

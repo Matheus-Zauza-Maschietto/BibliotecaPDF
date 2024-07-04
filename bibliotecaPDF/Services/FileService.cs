@@ -1,10 +1,12 @@
 ﻿using bibliotecaPDF.Context;
+using bibliotecaPDF.Exceptions;
 using bibliotecaPDF.Models;
 using bibliotecaPDF.Repository.Interfaces;
+using bibliotecaPDF.Services.Interfaces;
 
 namespace bibliotecaPDF.Services;
 
-public class FileService
+public class FileService : IFileService
 {
     private readonly IFileRepository _fileRepository;
     private readonly IUserRepository _userRepository;
@@ -19,17 +21,17 @@ public class FileService
         User? user = await _userRepository.GetUserByEmail(userEmail);
         if (user == null)
         {
-            throw new Exception("User not found, logout and login");
+            throw new BussinessException("User not found, logout and login");
         }
         await _fileRepository.DeleteFileByNameAndUser(fileName, user);
     }
 
-    public async Task<PdfFile> GetFileByName(string fileName, string userEmail)
+    public async Task<PdfFile?> GetFileByName(string fileName, string userEmail)
     {
         User? user = await _userRepository.GetUserByEmail(userEmail);
         if (user == null)
         {
-            throw new Exception("User not found, logout and login");
+            throw new BussinessException("User not found, logout and login");
         }
         return await _fileRepository.GetFileByName(fileName, user);
     }
@@ -39,7 +41,7 @@ public class FileService
         User? user = await _userRepository.GetUserByEmail(userEmail);
         if (user is null)
         {
-            throw new Exception("User not found, logout and login");
+            throw new BussinessException("User not found, logout and login");
         }
 
         return  await _fileRepository.GetFilesByUser(user);
@@ -49,14 +51,14 @@ public class FileService
     {
         if (formFile == null || formFile.Length == 0)
         {
-            throw new Exception("Empty File");
+            throw new BussinessException("Empty File");
         }
 
         User? user = await _userRepository.GetUserByEmail(userEmail);
 
         if(user is null)
         {
-            throw new Exception("User not found, logout and login");
+            throw new BussinessException("User not found, logout and login");
         }
 
         PdfFile file = new PdfFile()
@@ -80,4 +82,25 @@ public class FileService
         return fileBytes;
     }
 
+    public async Task FavoriteFileByName(string fileName, string userEmail)
+    {
+        User? user = await _userRepository.GetUserByEmail(userEmail);
+        if (user is null)
+        {
+            throw new BussinessException("User not found, logout and login");
+        }
+
+        await _fileRepository.SetFavoriteFileByName(fileName, user);    
+    }
+
+    public async Task UnfavoriteFileByName(string fileName, string userEmail)
+    {
+        User? user = await _userRepository.GetUserByEmail(userEmail);
+        if (user is null)
+        {
+            throw new BussinessException("User not found, logout and login");
+        }
+
+        await _fileRepository.SetUnfavoriteFileByName(fileName, user);
+    }
 }

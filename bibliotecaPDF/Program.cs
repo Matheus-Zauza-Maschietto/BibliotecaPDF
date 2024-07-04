@@ -3,6 +3,7 @@ using bibliotecaPDF.Models;
 using bibliotecaPDF.Repository;
 using bibliotecaPDF.Repository.Interfaces;
 using bibliotecaPDF.Services;
+using bibliotecaPDF.Services.Interfaces;
 using bibliotecaPDF.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -61,7 +62,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JsonWebTokensService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
-builder.Services.AddScoped<FileService>();
+builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
