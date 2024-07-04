@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,7 +51,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["JwtBearerTokenSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtBearerTokenSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["JwtBearerTokenSettings:SecretKey"])
+            Encoding.UTF8.GetBytes(builder.Configuration["JwtBearerTokenSettings:SecretKey"] ?? "Secret Key não encontrada")
         )
     };
 });
@@ -60,19 +61,47 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JsonWebTokensService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllOrigins",
-        builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
-});
-
+builder.Services.AddScoped<FileService>();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Biblioteca PDF", Version = "v1" });
+
+    // Configurar a autenticação no Swagger
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Insira o token JWT desta forma: Bearer {seu token}"
+    };
+    c.AddSecurityDefinition("Bearer", securityScheme);
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    new string[] {}
+                }
+            });
+});
 
 var app = builder.Build();
 
-app.UseCors("AllOrigins");
+app.UseCors(cr =>
+{
+    cr.AllowAnyHeader();
+    cr.AllowAnyMethod();
+    cr.AllowAnyOrigin();
+});
 
 if (app.Environment.IsDevelopment())
 {

@@ -45,11 +45,8 @@ public class FileService
         return  await _fileRepository.GetFilesByUser(user);
     }
 
-    public async Task CreateFile(IFormCollection formCollection, string userEmail)
+    public async Task CreateFile(IFormFile formFile, string userEmail)
     {
-        IFormFile? formFile = formCollection.Files.GetFile("file");
-
-
         if (formFile == null || formFile.Length == 0)
         {
             throw new Exception("Empty File");

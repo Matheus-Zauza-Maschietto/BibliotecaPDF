@@ -19,13 +19,12 @@ public class FilesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> UploadPDF()
+    public async Task<IActionResult> UploadPDF(IFormFile formFile)
     {
         try
         {
             string? userEmailClaim = User.FindFirstValue(ClaimTypes.Email);
-            IFormCollection formCollection = await Request.ReadFormAsync();
-            await _fileService.CreateFile(formCollection, userEmailClaim ?? "");
+            await _fileService.CreateFile(formFile, userEmailClaim ?? "");
             return Ok("PDF Adicionado com sucesso");
         }
         catch (Exception ex)

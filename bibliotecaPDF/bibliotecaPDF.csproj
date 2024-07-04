@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Docker\db_volume\" />
     <Folder Include="Middleware\" />
     <Folder Include="Services\Interfaces\" />
   </ItemGroup>

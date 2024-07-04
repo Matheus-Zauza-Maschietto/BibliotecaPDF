@@ -34,7 +34,7 @@ public class JsonWebTokensService
     private (SigningCredentials SigningCredentials, string Audience, string Issuer, DateTime Expires) BuscarInformacoesDoToken()
     {
         var signingCredentials = GerarCredenciais(_configuration["JwtBearerTokenSettings:SecretKey"] ?? "SecretKey not found");
-        double lifeTimeInMinutes = double.Parse(_configuration["JwtBearerTokenSettings:LifeTimeInMinutes"] ?? "LifeTimeInMinutes key not found");
+        double lifeTimeInMinutes = double.Parse(_configuration["JwtBearerTokenSettings:ExpiryTimeInMinutes"] ?? "ExpiryTimeInMinutes key not found");
         string audience = _configuration["JwtBearerTokenSettings:Audience"] ?? "Audience not found";
         string issuer = _configuration["JwtBearerTokenSettings:Issuer"] ?? "Issuer not found";
         DateTime expires = DateTime.UtcNow.AddMinutes(lifeTimeInMinutes);
