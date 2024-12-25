@@ -13,6 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using B2Net;
+using B2Net.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,7 +54,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["JwtBearerTokenSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtBearerTokenSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["JwtBearerTokenSettings:SecretKey"] ?? "Secret Key não encontrada")
+            Encoding.UTF8.GetBytes(builder.Configuration["JwtBearerTokenSettings:SecretKey"] ?? "Secret Key nï¿½o encontrada")
         )
     };
 });
@@ -60,15 +62,24 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserDTOValidator>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<JsonWebTokensService>();
+builder.Services.AddScoped<IBackBlazeService, BackBlazeService>();
+builder.Services.AddScoped<IBackBlazeRepository, BackBlazeRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IB2Client, B2Client>(p =>
+{
+    return new B2Client(new B2Options()
+    {
+        KeyId = builder.Configuration["BackBlaze:KeyId"],
+        ApplicationKey = builder.Configuration["BackBlaze:ApplicationKey"],
+        BucketId = builder.Configuration["BackBlaze:BucketId"] 
+    });;
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Biblioteca PDF", Version = "v1" });
-
-    // Configurar a autenticação no Swagger
     var securityScheme = new OpenApiSecurityScheme
     {
         Name = "Authorization",

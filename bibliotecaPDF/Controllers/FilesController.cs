@@ -83,8 +83,8 @@ public class FilesController : ControllerBase
         try
         {
             string? userEmailClaim = User.FindFirstValue(ClaimTypes.Email);
-            PdfFile pdfFile = await _fileService.GetFileByName(pdfName, userEmailClaim);
-            return File(pdfFile.Content, "application/octet-stream", pdfFile.FileName);
+            GetPdfFileDTO pdfFile = await _fileService.GetFileContentByName(pdfName, userEmailClaim);
+            return File(pdfFile.FileContent, "application/octet-stream", pdfFile.FileName);
         }
         catch (BussinessException ex)
         {

@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System.Numerics;
+using System.Runtime.InteropServices.JavaScript;
+using B2Net.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace bibliotecaPDF.Models;
 
 public class User: IdentityUser
 {
     public List<PdfFile> Files { get; set; }
+    public Int64 UserByteAmounts { get; set; }
 }

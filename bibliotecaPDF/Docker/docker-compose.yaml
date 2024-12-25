@@ -10,8 +10,8 @@ services:
       - MSSQL_SA_PASSWORD=Senha123!
     networks:
       - "bibliotecaPDF"
-    volumes:
-      - "./db_volume:/var/opt/mssql/data"
+    #volumes:
+    #  - "./db_volume:/var/opt/mssql/data"
   
   # app:
   #   depends_on: 
@@ -27,5 +27,5 @@ services:
 networks:
   bibliotecaPDF:
     driver:  bridge
-volumes:
-  db_volume:
+#volumes:
+#  db_volume:
