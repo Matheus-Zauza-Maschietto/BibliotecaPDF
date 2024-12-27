@@ -1,5 +1,4 @@
 ﻿using bibliotecaPDF.DTOs;
-using bibliotecaPDF.Exceptions;
 using bibliotecaPDF.Models;
 using bibliotecaPDF.Services;
 using bibliotecaPDF.Services.Interfaces;
@@ -7,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using bibliotecaPDF.Enums;
+using bibliotecaPDF.Models.Exceptions;
 
 namespace bibliotecaPDF.Controllers;
 
@@ -28,15 +29,15 @@ public class FilesController : ControllerBase
         {
             string? userEmailClaim = User.FindFirstValue(ClaimTypes.Email);
             await _fileService.CreateFile(formFile, userEmailClaim ?? "");
-            return Ok("PDF Adicionado com sucesso");
+            return Ok(new ResponseDTO(Status.OK, "PDF Adicionado com sucesso."));
         }
-        catch (BussinessException ex)
+        catch (BussinesException ex)
         {
-            return Problem(ex.Message);
+            return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
         catch (Exception ex)
         {
-            return Problem("An error was ocurred.");
+            return StatusCode(500, new ResponseDTO(Status.ERROR, ex.Message));
         }
     }
 
@@ -46,15 +47,16 @@ public class FilesController : ControllerBase
         try
         {
             string? userEmailClaim = User.FindFirstValue(ClaimTypes.Email);
-            return Ok(await _fileService.GetFilesList(userEmailClaim ?? ""));
+            var filesList = await _fileService.GetFilesList(userEmailClaim ?? "");
+            return Ok(new ResponseDTO(Status.OK, string.Empty, filesList));
         }
-        catch (BussinessException ex)
+        catch (BussinesException ex)
         {
-            return Problem(ex.Message);
+            return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
         catch (Exception ex)
         {
-            return Problem("An error was ocurred.");
+            return StatusCode(500, new ResponseDTO(Status.ERROR, ex.Message));
         }
     }
 
@@ -65,15 +67,15 @@ public class FilesController : ControllerBase
         {
             string? userEmailClaim = User.FindFirstValue(ClaimTypes.Email);
             PdfFile? pdfFile = await _fileService.GetFileByName(pdfName, userEmailClaim);
-            return Ok(new PdfFileDTO(pdfFile.FileName, pdfFile.IsFavorite));
+            return Ok(new ResponseDTO(Status.OK, string.Empty, new PdfFileDTO(pdfFile.FileName, pdfFile.IsFavorite, pdfFile.FileSize)));
         }
-        catch (BussinessException ex)
+        catch (BussinesException ex)
         {
-            return Problem(ex.Message);
+            return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
         catch (Exception ex)
         {
-            return Problem("An error was ocurred.");
+            return StatusCode(500, new ResponseDTO(Status.ERROR, ex.Message));
         }
     }
 
@@ -86,13 +88,13 @@ public class FilesController : ControllerBase
             GetPdfFileDTO pdfFile = await _fileService.GetFileContentByName(pdfName, userEmailClaim);
             return File(pdfFile.FileContent, "application/octet-stream", pdfFile.FileName);
         }
-        catch (BussinessException ex)
+        catch (BussinesException ex)
         {
-            return Problem(ex.Message);
+            return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
         catch (Exception ex)
         {
-            return Problem("An error was ocurred.");
+            return StatusCode(500, new ResponseDTO(Status.ERROR, ex.Message));
         }
     }
 
@@ -103,15 +105,15 @@ public class FilesController : ControllerBase
         {
             string? userEmailClaim = User.FindFirstValue(ClaimTypes.Email);
             await _fileService.DeleteFileByName(pdfName, userEmailClaim);
-            return Ok("PDF unfavorited");
+            return Ok(new ResponseDTO(Status.OK, "PDF Deletado com sucesso."));
         }
-        catch (BussinessException ex)
+        catch (BussinesException ex)
         {
-            return Problem(ex.Message);
+            return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
         catch (Exception ex)
         {
-            return Problem("An error was ocurred.");
+            return StatusCode(500, new ResponseDTO(Status.ERROR, ex.Message));
         }
     }
 
@@ -122,15 +124,15 @@ public class FilesController : ControllerBase
         {
             string? userEmailClaim = User.FindFirstValue(ClaimTypes.Email);
             await _fileService.FavoriteFileByName(pdfName, userEmailClaim);
-            return Ok("PDF Favorited");
+            return Ok(new ResponseDTO(Status.OK, "PDF favoritado."));
         }
-        catch (BussinessException ex)
+        catch (BussinesException ex)
         {
-            return Problem(ex.Message);
+            return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
         catch (Exception ex)
         {
-            return Problem("An error was ocurred.");
+            return StatusCode(500, new ResponseDTO(Status.ERROR, ex.Message));
         }
     }
 
@@ -141,15 +143,15 @@ public class FilesController : ControllerBase
         {
             string? userEmailClaim = User.FindFirstValue(ClaimTypes.Email);
             await _fileService.UnfavoriteFileByName(pdfName, userEmailClaim);
-            return Ok("PDF unfavorited");
+            return Ok(new ResponseDTO(Status.OK, "PDF desfavoritado."));
         }
-        catch (BussinessException ex)
+        catch (BussinesException ex)
         {
-            return Problem(ex.Message);
+            return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
         catch (Exception ex)
         {
-            return Problem("An error was ocurred.");
+            return StatusCode(500, new ResponseDTO(Status.ERROR, ex.Message));
         }
     }
 }

@@ -4,6 +4,7 @@ using bibliotecaPDF.Repository;
 using bibliotecaPDF.Repository.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using bibliotecaPDF.Models.Exceptions;
 
 namespace bibliotecaPDF.Services;
 
@@ -19,13 +20,24 @@ public class UserService
         _webTokensService = webTokensService;
     }
 
+    public async Task<User> GetUserByEmail(string email)
+    {
+        User? user = await _userRepository.GetUserByEmail(email);
+        if (user == null)
+        {
+            throw new BussinesException("Usuário não encontrado, faça login novamente.");
+        }
+
+        return user;
+    }
+
     public async Task CreateUser(CreateUserDTO userDto)
     {
         User? existUser = await _userRepository.GetUserByEmail(userDto.Email);
 
         if(existUser is not null)
         {
-            throw new Exception("Already exists an user with this email");
+            throw new BussinesException("Já existe um usuário com esse E-mail.");
         }
 
         IdentityResult result = await _userRepository.CreateUser(userDto);
@@ -42,14 +54,14 @@ public class UserService
 
         if (existUser is null)
         {
-            throw new Exception("Not exists an user with this email");
+            throw new BussinesException("Não existe um usuário com esse E-mail.");
         }
 
         bool passwordIsOk = await _userManager.CheckPasswordAsync(existUser, loginDto.Password);
 
         if(!passwordIsOk)
         {
-            throw new Exception("Password was wrong");
+            throw new BussinesException("Senha errada.");
         }
 
         return _webTokensService.GerarToken(GetClaims(loginDto));

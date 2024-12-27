@@ -1,5 +1,7 @@
 ﻿using bibliotecaPDF.DTOs;
+using bibliotecaPDF.Enums;
 using bibliotecaPDF.Models;
+using bibliotecaPDF.Models.Exceptions;
 using bibliotecaPDF.Services;
 using bibliotecaPDF.Validators;
 using FluentValidation;
@@ -25,13 +27,22 @@ public class UserController : ControllerBase
     {
         try
         {
-            new CreateUserDTOValidator().ValidateAndThrow(userDTO);
+            var validationResult = new CreateUserDTOValidator().Validate(userDTO);
+            if (!validationResult.IsValid)
+            {
+                return StatusCode(400, new ResponseDTO(Status.ERROR, validationResult.Errors));
+            }
+
             await _userService.CreateUser(userDTO);
-            return Ok("Usuario criado com sucesso");
+            return Ok(new ResponseDTO(Status.OK, "Usuário criado com sucesso."));
+        }
+        catch (BussinesException ex)
+        {
+            return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
         catch(Exception ex)
         {
-            return Problem(ex.Message);
+            return StatusCode(500, new ResponseDTO(Status.ERROR, ex.Message));
         }
     }
 
@@ -41,11 +52,15 @@ public class UserController : ControllerBase
         try
         {
             string token = await _userService.LoginUser(loginDTO);  
-            return Ok(token);
+            return Ok(new ResponseDTO(Status.OK, "Usuário logado com sucesso.", token));
+        }
+        catch (BussinesException ex)
+        {
+            return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
         catch(Exception ex)
         {
-            return Problem(ex.Message);
+            return StatusCode(500, new ResponseDTO(Status.ERROR, ex.Message));
         }
     }
 }

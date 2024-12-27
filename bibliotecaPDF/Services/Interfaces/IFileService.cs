@@ -9,7 +9,7 @@ public interface IFileService
     Task<PdfFile?> GetFileByName(string fileName, string userEmail);
 
     Task<GetPdfFileDTO?> GetFileContentByName(string fileName, string userEmail);
-    Task<List<string>> GetFilesList(string userEmail);
+    Task<List<PdfFileDTO>> GetFilesList(string userEmail);
     Task CreateFile(IFormFile formFile, string userEmail);
     Task FavoriteFileByName(string fileName, string userEmail);
     Task UnfavoriteFileByName(string fileName, string userEmail);

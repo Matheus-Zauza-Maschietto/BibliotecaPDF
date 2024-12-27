@@ -1,6 +1,6 @@
 ﻿using bibliotecaPDF.Context;
-using bibliotecaPDF.Exceptions;
 using bibliotecaPDF.Models;
+using bibliotecaPDF.Models.Exceptions;
 using bibliotecaPDF.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,14 +19,14 @@ public class FileRepository: IFileRepository
         PdfFile? file = await _applicationContext.PdfFile.AsNoTracking().FirstOrDefaultAsync(p => p.FileName == name && p.User.Id == user.Id);
         if (file == null)
         {
-            throw new NotFoundException("File Not Found.");
+            throw new BussinesException("Arquivo PDF não encontrado.");
         }
         return file;
     }
 
-    public async Task<List<string>> GetFilesByUser(User user)
+    public async Task<List<PdfFile>> GetFilesByUser(User user)
     {
-        return await _applicationContext.PdfFile.AsNoTracking().Where(p => p.User == user).Select(p => p.FileName).ToListAsync();
+        return await _applicationContext.PdfFile.AsNoTracking().Where(p => p.User == user).ToListAsync();
     }
 
     public async Task CreateFile(PdfFile file)
@@ -40,7 +40,7 @@ public class FileRepository: IFileRepository
         PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == fileName && p.User.Id == user.Id);
         if(file is null)
         {
-            throw new NotFoundException("File Not Found.");
+            throw new BussinesException("Arquivo PDF não encontrado.");
         }
         _applicationContext.PdfFile.Remove(file);
         _applicationContext.SaveChangesAsync();
@@ -51,7 +51,7 @@ public class FileRepository: IFileRepository
         PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == name && p.User.Id == user.Id);
         if (file is null)
         {
-            throw new NotFoundException("File Not Found.");
+            throw new BussinesException("Arquivo PDF não encontrado.");
         }
 
         if (file.IsFavorite == true)
@@ -68,7 +68,7 @@ public class FileRepository: IFileRepository
         PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == name && p.User.Id == user.Id);
         if (file is null)
         {
-            throw new NotFoundException("Arquivo não encontrado.");
+            throw new BussinesException("Arquivo PDF não encontrado.");
         }
 
         if (file.IsFavorite == false)
