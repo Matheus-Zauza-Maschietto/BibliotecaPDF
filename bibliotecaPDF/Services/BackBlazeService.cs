@@ -1,4 +1,6 @@
+using System.Collections;
 using B2Net.Models;
+using bibliotecaPDF.Models.Exceptions;
 using bibliotecaPDF.Repository.Interfaces;
 using bibliotecaPDF.Services.Interfaces;
 
@@ -24,10 +26,15 @@ public class BackBlazeService : IBackBlazeService
         return await _backBlazeRepository.DeleteB2File(fileId, fileName);
     }
     
-    public async Task<B2File?> UploadFile(IFormFile formFile, string userId)
+    public async Task<B2File?> UploadFile(ICollection<IFormFile> formFiles, string userId)
     {
+        IFormFile formFile = formFiles.First(p => p.Name == "formFile");
+        IFormFile? customName = formFiles.FirstOrDefault(p => p.Name == "customName");
         byte[] fileBytes = await GetByteArrayFromFormFile(formFile);
-        var file = await _backBlazeRepository.UploadB2File(fileBytes, formFile.FileName, new Dictionary<string, string>()
+        var file = await _backBlazeRepository.UploadB2File(
+            fileBytes, 
+            customName is not null ? GetCustomNameFromFormFile(customName) : formFile.FileName, 
+            new Dictionary<string, string>()
         {
             { "userId", userId }
         });
@@ -43,6 +50,14 @@ public class BackBlazeService : IBackBlazeService
             fileBytes = memoryStream.ToArray();
         }
         return fileBytes;
+    }
+
+    private string GetCustomNameFromFormFile(IFormFile customName)
+    {
+        using (var reader = new StreamReader(customName.OpenReadStream()))
+        {
+            return reader.ReadToEnd();
+        }
     }
     
     

@@ -68,21 +68,21 @@ public class FileService : IFileService
         return  (await _fileRepository.GetFilesByUser(user)).Select(p => new PdfFileDTO(p.FileName, p.IsFavorite, p.FileSize)).ToList();
     }
 
-    public async Task CreateFile(IFormFile formFile, string userEmail)
+    public async Task CreateFile(ICollection<IFormFile> formFiles, string userEmail)
     {
-        if (formFile == null || formFile.Length == 0)
+        if (formFiles.FirstOrDefault(p => p.Name == "formFile") == null || formFiles.FirstOrDefault(p => p.Name == "formFile")?.Length == 0)
         {
             throw new BussinesException("Arquivo vazio.");
         }
 
         User user = await _userService.GetUserByEmail(userEmail);
 
-        B2File? b2File = await _backBlazeService.UploadFile(formFile, user.Id);
+        B2File? b2File = await _backBlazeService.UploadFile(formFiles, user.Id);
         
         PdfFile file = new PdfFile()
         {
             User = user,
-            FileName = formFile.FileName,
+            FileName = b2File.FileName,
             BackBlazeId = b2File.FileId,
             FileSize = b2File.Size
         };
