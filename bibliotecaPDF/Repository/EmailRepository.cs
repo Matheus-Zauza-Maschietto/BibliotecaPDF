@@ -1,6 +1,6 @@
 namespace bibliotecaPDF.Repository;
 
-public class UserRepository
+public class EmailRepository
 {
     
 }

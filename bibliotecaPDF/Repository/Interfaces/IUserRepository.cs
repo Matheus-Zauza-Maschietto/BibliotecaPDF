@@ -1,11 +1,8 @@
-﻿using bibliotecaPDF.DTOs;
 using bibliotecaPDF.Models;
-using Microsoft.AspNetCore.Identity;
 
-namespace bibliotecaPDF.Repository.Interfaces;
+namespace bibliotecaPDF.Repository;
 
 public interface IUserRepository
 {
-    Task<User?> GetUserByEmail(string email);
-    Task<IdentityResult> CreateUser(CreateUserDTO userDto);
+    Task<User>
 }
