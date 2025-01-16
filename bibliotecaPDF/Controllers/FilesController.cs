@@ -31,7 +31,7 @@ public class FilesController : ControllerBase
             await _fileService.CreateFile(formFile, userEmailClaim ?? "");
             return Ok(new ResponseDTO(Status.OK, "PDF Adicionado com sucesso."));
         }
-        catch (BussinesException ex)
+        catch (BusinessException ex)
         {
             return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
@@ -50,7 +50,7 @@ public class FilesController : ControllerBase
             var filesList = await _fileService.GetFilesList(userEmailClaim ?? "");
             return Ok(new ResponseDTO(Status.OK, string.Empty, filesList));
         }
-        catch (BussinesException ex)
+        catch (BusinessException ex)
         {
             return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
@@ -69,7 +69,7 @@ public class FilesController : ControllerBase
             PdfFile? pdfFile = await _fileService.GetFileByName(pdfName, userEmailClaim);
             return Ok(new ResponseDTO(Status.OK, string.Empty, new PdfFileDTO(pdfFile.FileName, pdfFile.IsFavorite, pdfFile.FileSize)));
         }
-        catch (BussinesException ex)
+        catch (BusinessException ex)
         {
             return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
@@ -86,9 +86,9 @@ public class FilesController : ControllerBase
         {
             string? userEmailClaim = User.FindFirstValue(ClaimTypes.Email);
             GetPdfFileDTO pdfFile = await _fileService.GetFileContentByName(pdfName, userEmailClaim);
-            return File(pdfFile.FileContent, "application/octet-stream", pdfFile.FileName);
+            return File(pdfFile.FileContent, "application/pdf", pdfFile.FileName);
         }
-        catch (BussinesException ex)
+        catch (BusinessException ex)
         {
             return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
@@ -107,7 +107,7 @@ public class FilesController : ControllerBase
             await _fileService.DeleteFileByName(pdfName, userEmailClaim);
             return Ok(new ResponseDTO(Status.OK, "PDF Deletado com sucesso."));
         }
-        catch (BussinesException ex)
+        catch (BusinessException ex)
         {
             return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
@@ -126,7 +126,7 @@ public class FilesController : ControllerBase
             await _fileService.FavoriteFileByName(pdfName, userEmailClaim);
             return Ok(new ResponseDTO(Status.OK, "PDF favoritado."));
         }
-        catch (BussinesException ex)
+        catch (BusinessException ex)
         {
             return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }
@@ -145,7 +145,7 @@ public class FilesController : ControllerBase
             await _fileService.UnfavoriteFileByName(pdfName, userEmailClaim);
             return Ok(new ResponseDTO(Status.OK, "PDF desfavoritado."));
         }
-        catch (BussinesException ex)
+        catch (BusinessException ex)
         {
             return BadRequest(new ResponseDTO(Status.ERROR, ex.Message));
         }

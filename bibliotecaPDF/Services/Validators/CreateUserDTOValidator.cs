@@ -15,7 +15,7 @@ public class CreateUserDTOValidator : AbstractValidator<CreateUserDTO>
             .MinimumLength(5).WithMessage("O campo \"E-mail.\" não pode ter menos de 5 caracteres ao total")
             .EmailAddress().WithMessage("O campo \"E-mail.\" não deve possui @ e dominio de E-mail.");
 
-        RuleFor(p => p.UserName)
+        RuleFor(p => p.Name)
             .NotEmpty().WithMessage("O campo \"Nome\" não pode ser vazio ou nulo")
             .Length(3, 100).WithMessage("O campo \"Nome\" deve estar entre 3 a 100 caracteres");
 

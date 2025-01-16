@@ -52,6 +52,10 @@
               "target": "Package",
               "version": "[11.3.0, )"
             },
+            "MailKit": {
+              "target": "Package",
+              "version": "[4.9.0, )"
+            },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[8.0.6, )"
@@ -74,9 +78,17 @@
               "target": "Package",
               "version": "[8.0.6, )"
             },
+            "Microsoft.Identity.Client": {
+              "target": "Package",
+              "version": "[4.67.1, )"
+            },
             "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
               "target": "Package",
               "version": "[1.19.5, )"
+            },
+            "MimeKit": {
+              "target": "Package",
+              "version": "[4.9.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",

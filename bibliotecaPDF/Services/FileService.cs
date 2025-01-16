@@ -4,24 +4,22 @@ using bibliotecaPDF.Models;
 using bibliotecaPDF.Models.Exceptions;
 using bibliotecaPDF.Repository.Interfaces;
 using bibliotecaPDF.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 namespace bibliotecaPDF.Services;
 
 public class FileService : IFileService
 {
     private readonly IFileRepository _fileRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly UserService _userService;
+    private readonly IUserService _userService;
     private readonly IBackBlazeService _backBlazeService;
     public FileService(
         IFileRepository fileRepository, 
-        IUserRepository userRepository, 
         IBackBlazeService backBlazeService,
-        UserService userService)
+        IUserService userService)
     {
         _userService = userService;
         _fileRepository = fileRepository;
-        _userRepository = userRepository;
         _backBlazeService = backBlazeService;
     }
 
@@ -40,7 +38,7 @@ public class FileService : IFileService
 
         if (pdfFile is null)
         {
-            throw new BussinesException("Arquivo PDF não encontrado.");
+            throw new BusinessException("Arquivo PDF não encontrado.");
         }
         
         return pdfFile;
@@ -54,7 +52,7 @@ public class FileService : IFileService
 
         if (pdfFile is null)
         {
-            throw new BussinesException("Arquivo PDF não encontrado.");
+            throw new BusinessException("Arquivo PDF não encontrado.");
         }
 
         B2File b2File = await _backBlazeService.DownloadB2File(pdfFile.BackBlazeId);
@@ -72,12 +70,15 @@ public class FileService : IFileService
     {
         if (formFiles.FirstOrDefault(p => p.Name == "formFile") == null || formFiles.FirstOrDefault(p => p.Name == "formFile")?.Length == 0)
         {
-            throw new BussinesException("Arquivo vazio.");
+            throw new BusinessException("Arquivo vazio.");
         }
-
         User user = await _userService.GetUserByEmail(userEmail);
+        IFormFile formFile = formFiles.First(p => p.Name == "formFile");
+        byte[] fileBytes = await GetByteArrayFromFormFile(formFile);
 
-        B2File? b2File = await _backBlazeService.UploadFile(formFiles, user.Id);
+        
+        
+        B2File? b2File = await _backBlazeService.UploadFile(fileBytes, formFile.FileName, user.Id);
         
         PdfFile file = new PdfFile()
         {
@@ -88,6 +89,17 @@ public class FileService : IFileService
         };
 
         await _fileRepository.CreateFile(file);
+    }
+    
+    private async Task<byte[]> GetByteArrayFromFormFile(IFormFile formFile)
+    {
+        byte[] fileBytes;
+        using (var memoryStream = new MemoryStream())
+        {
+            await formFile.CopyToAsync(memoryStream);
+            fileBytes = memoryStream.ToArray();
+        }
+        return fileBytes;
     }
     
 

@@ -19,7 +19,7 @@ public class FileRepository: IFileRepository
         PdfFile? file = await _applicationContext.PdfFile.AsNoTracking().FirstOrDefaultAsync(p => p.FileName == name && p.User.Id == user.Id);
         if (file == null)
         {
-            throw new BussinesException("Arquivo PDF não encontrado.");
+            throw new BusinessException("Arquivo PDF não encontrado.");
         }
         return file;
     }
@@ -40,7 +40,7 @@ public class FileRepository: IFileRepository
         PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == fileName && p.User.Id == user.Id);
         if(file is null)
         {
-            throw new BussinesException("Arquivo PDF não encontrado.");
+            throw new BusinessException("Arquivo PDF não encontrado.");
         }
         _applicationContext.PdfFile.Remove(file);
         _applicationContext.SaveChangesAsync();
@@ -51,7 +51,7 @@ public class FileRepository: IFileRepository
         PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == name && p.User.Id == user.Id);
         if (file is null)
         {
-            throw new BussinesException("Arquivo PDF não encontrado.");
+            throw new BusinessException("Arquivo PDF não encontrado.");
         }
 
         if (file.IsFavorite == true)
@@ -68,7 +68,7 @@ public class FileRepository: IFileRepository
         PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == name && p.User.Id == user.Id);
         if (file is null)
         {
-            throw new BussinesException("Arquivo PDF não encontrado.");
+            throw new BusinessException("Arquivo PDF não encontrado.");
         }
 
         if (file.IsFavorite == false)

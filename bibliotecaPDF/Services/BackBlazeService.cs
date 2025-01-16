@@ -26,14 +26,11 @@ public class BackBlazeService : IBackBlazeService
         return await _backBlazeRepository.DeleteB2File(fileId, fileName);
     }
     
-    public async Task<B2File?> UploadFile(ICollection<IFormFile> formFiles, string userId)
+    public async Task<B2File?> UploadFile(byte[] fileBytes, string fileName, string userId)
     {
-        IFormFile formFile = formFiles.First(p => p.Name == "formFile");
-        IFormFile? customName = formFiles.FirstOrDefault(p => p.Name == "customName");
-        byte[] fileBytes = await GetByteArrayFromFormFile(formFile);
         var file = await _backBlazeRepository.UploadB2File(
             fileBytes, 
-            customName is not null ? GetCustomNameFromFormFile(customName) : formFile.FileName, 
+            fileName, 
             new Dictionary<string, string>()
         {
             { "userId", userId }
@@ -51,14 +48,4 @@ public class BackBlazeService : IBackBlazeService
         }
         return fileBytes;
     }
-
-    private string GetCustomNameFromFormFile(IFormFile customName)
-    {
-        using (var reader = new StreamReader(customName.OpenReadStream()))
-        {
-            return reader.ReadToEnd();
-        }
-    }
-    
-    
 }

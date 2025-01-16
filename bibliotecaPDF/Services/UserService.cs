@@ -5,27 +5,49 @@ using bibliotecaPDF.Repository.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using bibliotecaPDF.Models.Exceptions;
+using bibliotecaPDF.Services.Interfaces;
 
 namespace bibliotecaPDF.Services;
 
-public class UserService
+public class UserService : IUserService
 {
     private readonly UserManager<User> _userManager;
     private readonly JsonWebTokensService _webTokensService;
+    private readonly IEmailService _emailService;
     private readonly IUserRepository _userRepository;
-    public UserService(UserManager<User> userManager, JsonWebTokensService webTokensService, IUserRepository userRepository)
+    private readonly IGenericRepository _genericRepository;
+    public UserService(
+            UserManager<User> userManager, 
+            JsonWebTokensService webTokensService,
+            IEmailService emailService,
+            IUserRepository userRepository,
+            IGenericRepository genericRepository
+        )
     {
-        _userRepository = userRepository;
         _userManager = userManager;
         _webTokensService = webTokensService;
+        _emailService = emailService;
+        _userRepository = userRepository;
+        _genericRepository = genericRepository;
     }
 
-    public async Task<User> GetUserByEmail(string email)
+    public async Task<User> GetUserWithPlanByEmail(string email)
     {
-        User? user = await _userRepository.GetUserByEmail(email);
+        User? user = await _userRepository.GetUserWithPlanByEmail(email);
         if (user == null)
         {
-            throw new BussinesException("Usuário não encontrado, faça login novamente.");
+            throw new BusinessException("Usuário não encontrado.");
+        }
+
+        return user;
+    }
+    
+    public async Task<User> GetUserByEmail(string email)
+    {
+        User? user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            throw new BusinessException("Usuário não encontrado.");
         }
 
         return user;
@@ -33,35 +55,71 @@ public class UserService
 
     public async Task CreateUser(CreateUserDTO userDto)
     {
-        User? existUser = await _userRepository.GetUserByEmail(userDto.Email);
+        User? existUser = await _userRepository.GetUserByEmailOrUsername(userDto.Email);
 
-        if(existUser is not null)
+        if (existUser is not null)
         {
-            throw new BussinesException("Já existe um usuário com esse E-mail.");
+            throw new BusinessException("Já existe um usuário com esse E-mail.");
         }
 
-        IdentityResult result = await _userRepository.CreateUser(userDto);
+
+        User newUser = new User()
+        {
+            Email = userDto.Email,
+            UserName = userDto.Email,
+            Name = userDto.Name,
+            EmailConfirmed = false,
+            CapacityPlan = _genericRepository.Get<CapacityPlan>(1)
+        };
+        
+        IdentityResult result = await _userManager.CreateAsync(newUser, userDto.Password);
 
         if (!result.Succeeded)
         {
-            throw new Exception(GetIdentityResultErros(result));
+            throw new BusinessException(GetIdentityResultErros(result));
         }
+        User nearlyCreatedUser = await GetUserByEmail(userDto.Email);
+        var emailConfirmToken = await GenerateUserActivationToken(nearlyCreatedUser);
+        await _emailService.SendUserActivationEmailAsync(newUser.Email, newUser.Id, emailConfirmToken);
     }
 
+    public async Task<string> GenerateUserActivationToken(User user)
+    {
+        string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        return token;
+    }
+    
+    public async Task ActivateUser(string id, string token)
+    {
+        User? user = await _userManager.FindByIdAsync(id);
+        if (user is null) throw new BusinessException("Usuário não encontrado.");
+        
+        byte[] tokenB64 = System.Convert.FromBase64String(token);
+        string finalToken = System.Text.ASCIIEncoding.ASCII.GetString(tokenB64);
+        IdentityResult result = await _userManager.ConfirmEmailAsync(user, finalToken);
+        
+        if(!result.Succeeded) throw new BusinessException(GetIdentityResultErros(result));
+    }
+    
     public async Task<string> LoginUser(LoginUserDTO loginDto)
     {
         User? existUser = await _userManager.FindByEmailAsync(loginDto.Email);
 
         if (existUser is null)
         {
-            throw new BussinesException("Não existe um usuário com esse E-mail.");
+            throw new BusinessException("Não existe um usuário com esse E-mail.");
         }
 
         bool passwordIsOk = await _userManager.CheckPasswordAsync(existUser, loginDto.Password);
 
         if(!passwordIsOk)
         {
-            throw new BussinesException("Senha errada.");
+            throw new BusinessException("Senha errada.");
+        }
+
+        if (!await _userManager.IsEmailConfirmedAsync(existUser))
+        {
+            throw new BusinessException("E-Mail não confirmado. Acesse seu e-mail e confirme sua conta.");
         }
 
         return _webTokensService.GerarToken(GetClaims(loginDto));
@@ -75,6 +133,6 @@ public class UserService
         });
     }
 
-    private string GetIdentityResultErros(IdentityResult identityResult) => string.Join(". ", identityResult.Errors.Select(p => p.Description));
+    private string GetIdentityResultErros(IdentityResult identityResult) => string.Join(". \n", identityResult.Errors.Select(p => p.Description));
     
 }

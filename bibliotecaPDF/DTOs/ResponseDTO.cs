@@ -9,6 +9,12 @@ public class ResponseDTO
     public List<string> Messages { get; set; } = new List<string>();
     public object? Response { get; set; }
 
+    public ResponseDTO(Status status, object response)
+    {
+        Status = status;    
+        Response = response;    
+    }
+    
     public ResponseDTO(Status status, string message, object? response = null)
     {
         Status = status;

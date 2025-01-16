@@ -1,6 +1,8 @@
+using bibliotecaPDF.Models;
+
 namespace bibliotecaPDF.Services.Interfaces;
 
-public class IEmailService
+public interface IEmailService
 {
-    
+    Task SendUserActivationEmailAsync(string email, string id, string token);
 }

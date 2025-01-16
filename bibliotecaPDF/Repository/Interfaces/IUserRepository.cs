@@ -4,5 +4,6 @@ namespace bibliotecaPDF.Repository;
 
 public interface IUserRepository
 {
-    Task<User>
+    Task<User?> GetUserWithPlanByEmail(string email);
+    Task<User?> GetUserByEmailOrUsername(string email);
 }
