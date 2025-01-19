@@ -67,7 +67,7 @@ public class FilesController : ControllerBase
         {
             string? userEmailClaim = User.FindFirstValue(ClaimTypes.Email);
             PdfFile? pdfFile = await _fileService.GetFileByName(pdfName, userEmailClaim);
-            return Ok(new ResponseDTO(Status.OK, string.Empty, new PdfFileDTO(pdfFile.FileName, pdfFile.IsFavorite, pdfFile.FileSize)));
+            return Ok(new ResponseDTO(Status.OK, string.Empty, new PdfFileDTO(pdfFile.Id, pdfFile.FileName, pdfFile.IsFavorite, pdfFile.FileSize)));
         }
         catch (BusinessException ex)
         {

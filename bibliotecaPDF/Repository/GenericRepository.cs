@@ -33,4 +33,9 @@ public class GenericRepository : IGenericRepository
     {
         return _context.Set<T>().Find(id);
     }
+
+    public bool SaveChanges()
+    {
+        return _context.SaveChanges() > 0;
+    }
 }

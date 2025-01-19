@@ -1,3 +1,3 @@
 ﻿namespace bibliotecaPDF.DTOs;
 
-public record PdfFileDTO(string? FileName, bool? IsFavorite, long? fileSize);
+public record PdfFileDTO(int id, string? FileName, bool? IsFavorite, long? fileSize);

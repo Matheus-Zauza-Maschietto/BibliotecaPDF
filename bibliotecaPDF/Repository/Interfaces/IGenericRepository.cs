@@ -6,4 +6,5 @@ public interface IGenericRepository
     T Update<T>(T objectToAdd) where T : class;
     T Delete<T>(T objectToAdd) where T : class;
     T? Get<T>(int id) where T : class;
+    bool SaveChanges();
 }

@@ -13,6 +13,7 @@ public class PdfFile
     [Required]
     [MinLength(3)]
     [MaxLength(100)]
+    
     public string FileName { get; set; }
 
     public long FileSize { get; set; }
