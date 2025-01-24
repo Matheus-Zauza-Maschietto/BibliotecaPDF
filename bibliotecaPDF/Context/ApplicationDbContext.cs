@@ -25,10 +25,19 @@ public class ApplicationDbContext : IdentityDbContext<User>
         builder.Entity<User>()
             .HasOne<CapacityPlan>(p => p.CapacityPlan)
             .WithMany(p => p.Users);
+        
         builder.Entity<User>()
             .HasMany<PdfFile>(p => p.Files)
             .WithOne(p => p.User);
+        
+        builder.Entity<PdfFile>()
+            .HasOne(p => p.User)
+            .WithMany(p => p.Files);
 
+        builder.Entity<CapacityPlan>()
+            .HasMany<User>(p => p.Users)
+            .WithOne(p => p.CapacityPlan);
+        
         builder.Entity<CapacityPlan>()
             .HasData(new CapacityPlan()
                 {

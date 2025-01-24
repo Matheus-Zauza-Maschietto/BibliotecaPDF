@@ -15,13 +15,12 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using B2Net;
 using B2Net.Models;
-using Microsoft.Identity.Client;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
@@ -115,7 +114,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 var app = builder.Build();
-app.ConfigureInitialMigration();
+//app.ConfigureInitialMigration();
 app.UseCors(cr =>
 {
     cr.AllowAnyHeader();

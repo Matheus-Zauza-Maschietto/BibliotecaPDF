@@ -5,6 +5,9 @@ using bibliotecaPDF.Models.Exceptions;
 using bibliotecaPDF.Repository.Interfaces;
 using bibliotecaPDF.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Parser;
+using Microsoft.EntityFrameworkCore;
 
 namespace bibliotecaPDF.Services;
 
@@ -84,7 +87,7 @@ public class FileService : IFileService
         if (pdfFile is not null) throw new BusinessException("Você já possui um pdf com esse nome.");
         
         byte[] fileBytes = await GetByteArrayFromFormFile(formFile);
-
+        
         B2File? b2File = await _backBlazeService.UploadFile(fileBytes, formFile.FileName, user.Id);
         
         PdfFile file = new PdfFile()
@@ -92,13 +95,32 @@ public class FileService : IFileService
             User = user,
             FileName = b2File.FileName,
             BackBlazeId = b2File.FileId,
-            FileSize = long.Parse(b2File.ContentLength)
+            FileSize = long.Parse(b2File.ContentLength),
+            FileContentTsVector = EF.Functions.ToTsVector("portuguese", b2File.FileName + " " + ExtractTextFromPdfBytes(fileBytes))
         };
         
         await _fileRepository.CreateFile(file);
         user.ByteAmounts += long.Parse(b2File.ContentLength);
         _genericRepository.Update(user);
         _genericRepository.SaveChanges();   
+    }
+    
+    private string ExtractTextFromPdfBytes(byte[] pdfBytes)
+    {
+        using (var memoryStream = new MemoryStream(pdfBytes))
+        using (var pdfReader = new PdfReader(memoryStream))
+        using (var pdfDocument = new PdfDocument(pdfReader))
+        {
+            var text = string.Empty;
+
+            for (int i = 1; i <= pdfDocument.GetNumberOfPages(); i++)
+            {
+                var page = pdfDocument.GetPage(i);
+                text += PdfTextExtractor.GetTextFromPage(page);
+            }
+
+            return text;
+        }
     }
     
     private async Task<byte[]> GetByteArrayFromFormFile(IFormFile formFile)

@@ -52,47 +52,43 @@
               "target": "Package",
               "version": "[11.3.0, )"
             },
-            "MailKit": {
-              "target": "Package",
-              "version": "[4.9.0, )"
-            },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
-              "version": "[8.0.6, )"
+              "version": "[9.0.1, )"
             },
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.6, )"
+              "version": "[9.0.1, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.6, )"
+              "version": "[9.0.1, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.6, )"
-            },
-            "Microsoft.EntityFrameworkCore.SqlServer": {
-              "target": "Package",
-              "version": "[8.0.6, )"
+              "version": "[9.0.1, )"
             },
             "Microsoft.Identity.Client": {
               "target": "Package",
-              "version": "[4.67.1, )"
+              "version": "[4.67.2, )"
             },
             "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
               "target": "Package",
-              "version": "[1.19.5, )"
+              "version": "[1.21.0, )"
             },
-            "MimeKit": {
+            "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
-              "version": "[4.9.0, )"
+              "version": "[9.0.3, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[6.4.0, )"
+              "version": "[7.2.0, )"
+            },
+            "itext7": {
+              "target": "Package",
+              "version": "[9.0.0, )"
             }
           },
           "imports": [

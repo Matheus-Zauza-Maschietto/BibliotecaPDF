@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NpgsqlTypes;
 
 namespace bibliotecaPDF.Models;
 
@@ -18,7 +19,8 @@ public class PdfFile
 
     public long FileSize { get; set; }
     public string BackBlazeId { get; set; }
-    public bool IsFavorite { get; set; }
+    public bool IsFavorite { get; set; } = false;
+    public NpgsqlTsVector? FileContentTsVector { get; set; }
 
     public PdfFile()
     {

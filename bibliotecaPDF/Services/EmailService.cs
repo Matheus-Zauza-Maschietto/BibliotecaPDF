@@ -1,7 +1,6 @@
 using System.Text;
 using bibliotecaPDF.Repository.Interfaces;
 using bibliotecaPDF.Services.Interfaces;
-using Org.BouncyCastle.Utilities.Encoders;
 
 namespace bibliotecaPDF.Services;
 
