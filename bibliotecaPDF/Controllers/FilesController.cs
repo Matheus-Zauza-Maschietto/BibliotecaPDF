@@ -60,7 +60,7 @@ public class FilesController : ControllerBase
     }
     
     [HttpPost]
-    public async Task<IActionResult> UploadPDF(ICollection<IFormFile> formFile)
+    public async Task<IActionResult> UploadPDF(IFormCollection forms, IFormFile formFile)
     {
         try
         {

@@ -10,7 +10,7 @@ public interface IFileService
 
     Task<GetPdfFileDTO?> GetFileContentById(int id, string userEmail);
     Task<List<PdfFile>> GetFilesList(string userEmail);
-    Task CreateFile(ICollection<IFormFile> formFiles, string userEmail);
+    Task CreateFile(IFormFile? formFile, string userEmail);
     Task FavoriteFileById(int id, string userEmail);
     Task UnfavoriteFileById(int id, string userEmail);
     Task<List<PdfFile>> SearchPDFs(string query, string userEmail);

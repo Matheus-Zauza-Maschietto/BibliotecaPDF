@@ -121,14 +121,13 @@ public class FileService : IFileService
         return  await _fileRepository.GetFilesByUser(user);
     }
 
-    public async Task CreateFile(ICollection<IFormFile> formFiles, string userEmail)
+    public async Task CreateFile(IFormFile? formFile, string userEmail)
     {
-        if (formFiles.FirstOrDefault(p => p.Name == "formFile") == null || formFiles.FirstOrDefault(p => p.Name == "formFile")?.Length == 0)
+        if (formFile == null || formFile?.Length == 0)
         {
             throw new BusinessException("Arquivo vazio.");
         }
         User user = await _userService.GetUserByEmail(userEmail);
-        IFormFile formFile = formFiles.First(p => p.Name == "formFile");
 
         PdfFile? pdfFile = await _fileRepository.GetFileByName(formFile.FileName, user);
         if (pdfFile is not null) throw new BusinessException("Você já possui um pdf com esse nome.");
