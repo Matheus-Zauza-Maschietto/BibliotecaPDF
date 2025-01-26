@@ -5,12 +5,16 @@ namespace bibliotecaPDF.Services.Interfaces;
 
 public interface IFileService
 {
-    Task DeleteFileByName(string fileName, string userEmail);
-    Task<PdfFile?> GetFileByName(string fileName, string userEmail);
+    Task DeleteFileById(int id, string userEmail);
+    Task<PdfFile?> GetFileById(int id, string userEmail);
 
-    Task<GetPdfFileDTO?> GetFileContentByName(string fileName, string userEmail);
-    Task<List<PdfFileDTO>> GetFilesList(string userEmail);
+    Task<GetPdfFileDTO?> GetFileContentById(int id, string userEmail);
+    Task<List<PdfFile>> GetFilesList(string userEmail);
     Task CreateFile(ICollection<IFormFile> formFiles, string userEmail);
-    Task FavoriteFileByName(string fileName, string userEmail);
-    Task UnfavoriteFileByName(string fileName, string userEmail);
+    Task FavoriteFileById(int id, string userEmail);
+    Task UnfavoriteFileById(int id, string userEmail);
+    Task<List<PdfFile>> SearchPDFs(string query, string userEmail);
+    Task<List<PdfFile>> SearchPublicPDFs(string query);
+    Task<PdfFile?> UpdateFileById(int id, UpdatePdfFileDTO fileDto, string userEmail);
+
 }

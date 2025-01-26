@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
 using Microsoft.EntityFrameworkCore;
+using NpgsqlTypes;
 
 namespace bibliotecaPDF.Services;
 
@@ -29,20 +30,35 @@ public class FileService : IFileService
         _genericRepository = genericRepository;
     }
 
-    public async Task DeleteFileByName(string fileName, string userEmail)
+    public async Task<PdfFile?> UpdateFileById(int id, UpdatePdfFileDTO fileDto, string userEmail)
     {
         User user = await _userService.GetUserByEmail(userEmail);
 
-        await GetFileByName(fileName, userEmail);
+        PdfFile? pdfFile = await _fileRepository.GetFileById(id, user);
+
+        if(pdfFile is null)
+            throw new BusinessException("PDF não encontrado !");
+
+        pdfFile.UpdatePdfFile(fileDto);
+        _genericRepository.Update(pdfFile);
+        _genericRepository.SaveChanges();
+        return pdfFile;
+    }
+    
+    public async Task DeleteFileById(int id, string userEmail)
+    {
+        User user = await _userService.GetUserByEmail(userEmail);
+
+        await GetFileById(id, userEmail);
         
-        await _fileRepository.DeleteFileByNameAndUser(fileName, user);
+        await _fileRepository.DeleteFileByIdAndUser(id, user);
     }
 
-    public async Task<PdfFile?> GetFileByName(string fileName, string userEmail)
+    public async Task<PdfFile?> GetFileByName(string pdfName, string userEmail)
     {
         User user = await _userService.GetUserByEmail(userEmail);
         
-        PdfFile? pdfFile = await _fileRepository.GetFileByName(fileName, user);
+        PdfFile? pdfFile = await _fileRepository.GetFileByName(pdfName, user);
 
         if (pdfFile is null)
         {
@@ -52,11 +68,42 @@ public class FileService : IFileService
         return pdfFile;
     }
     
-    public async Task<GetPdfFileDTO?> GetFileContentByName(string fileName, string userEmail)
+    public async Task<PdfFile?> GetFileById(int id, string userEmail)
+    {
+        User user = await _userService.GetUserByEmail(userEmail);
+        
+        PdfFile? pdfFile = await _fileRepository.GetFileById(id, user);
+
+        if (pdfFile is null)
+        {
+            throw new BusinessException("Arquivo PDF não encontrado.");
+        }
+        
+        return pdfFile;
+    }
+
+    public async Task<List<PdfFile>> SearchPDFs(string query, string userEmail)
+    {
+        User user = await _userService.GetUserByEmail(userEmail);
+        
+        List<PdfFile> pdfFiles = await _fileRepository.GetPDFsBySearch(query, user);
+        
+        return  pdfFiles;
+    }
+    
+    public async Task<List<PdfFile>> SearchPublicPDFs(string query)
+    {
+        List<PdfFile> pdfFiles = await _fileRepository.GetPublicPDFsBySearch(query);
+        
+        return  pdfFiles;
+    }
+
+    
+    public async Task<GetPdfFileDTO?> GetFileContentById(int id, string userEmail)
     {
         User user = await _userService.GetUserByEmail(userEmail);
 
-        PdfFile? pdfFile = await _fileRepository.GetFileByName(fileName, user);
+        PdfFile? pdfFile = await _fileRepository.GetFileById(id, user);
 
         if (pdfFile is null)
         {
@@ -67,11 +114,11 @@ public class FileService : IFileService
         return new GetPdfFileDTO(pdfFile.FileName, b2File.FileData);
     }
 
-    public async Task<List<PdfFileDTO>> GetFilesList(string userEmail)
+    public async Task<List<PdfFile>> GetFilesList(string userEmail)
     {
         User user = await _userService.GetUserByEmail(userEmail);
 
-        return  (await _fileRepository.GetFilesByUser(user)).Select(p => new PdfFileDTO(p.Id, p.FileName, p.IsFavorite, p.FileSize)).ToList();
+        return  await _fileRepository.GetFilesByUser(user);
     }
 
     public async Task CreateFile(ICollection<IFormFile> formFiles, string userEmail)
@@ -89,14 +136,17 @@ public class FileService : IFileService
         byte[] fileBytes = await GetByteArrayFromFormFile(formFile);
         
         B2File? b2File = await _backBlazeService.UploadFile(fileBytes, formFile.FileName, user.Id);
-        
+        string pdfText = ExtractTextFromPdfBytes(fileBytes);
+        NpgsqlTsVector? tsVector = await _fileRepository.GetTsVectorByConcatString(b2File.FileName, pdfText); 
         PdfFile file = new PdfFile()
         {
             User = user,
             FileName = b2File.FileName,
+            FileSurname   = b2File.FileName,
             BackBlazeId = b2File.FileId,
             FileSize = long.Parse(b2File.ContentLength),
-            FileContentTsVector = EF.Functions.ToTsVector("portuguese", b2File.FileName + " " + ExtractTextFromPdfBytes(fileBytes))
+            FileContentTsVector = tsVector,
+            IsPublic = false
         };
         
         await _fileRepository.CreateFile(file);
@@ -134,18 +184,17 @@ public class FileService : IFileService
         return fileBytes;
     }
     
-
-    public async Task FavoriteFileByName(string fileName, string userEmail)
+    public async Task FavoriteFileById(int id, string userEmail)
     {
         User user = await _userService.GetUserByEmail(userEmail);
 
-        await _fileRepository.SetFavoriteFileByName(fileName, user);    
+        await _fileRepository.SetFavoriteFileById(id, user);    
     }
 
-    public async Task UnfavoriteFileByName(string fileName, string userEmail)
+    public async Task UnfavoriteFileById(int id, string userEmail)
     {
         User user = await _userService.GetUserByEmail(userEmail);
 
-        await _fileRepository.SetUnfavoriteFileByName(fileName, user);
+        await _fileRepository.SetUnfavoriteFileById(id, user);
     }
 }

@@ -3,6 +3,7 @@ using bibliotecaPDF.Models;
 using bibliotecaPDF.Models.Exceptions;
 using bibliotecaPDF.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using NpgsqlTypes;
 
 namespace bibliotecaPDF.Repository;
 
@@ -14,13 +15,28 @@ public class FileRepository: IFileRepository
         _applicationContext = context;
     }
 
+    public async Task<List<PdfFile>> GetPublicPDFsBySearch(string searchTerm)
+    {
+        return _applicationContext.PdfFile
+            .Where(p => p.IsPublic == true)
+            .Where(p =>
+                p.FileContentTsVector.Matches(EF.Functions.PhraseToTsQuery("portuguese", searchTerm))
+            )
+            .ToList();
+    }
+    
+    public async Task<PdfFile?> GetFileById(int id, User user)
+    {
+        PdfFile? file = await _applicationContext
+            .PdfFile
+            .FirstOrDefaultAsync(p => p.Id == id && p.User.Id == user.Id);
+        return file;
+    }
     public async Task<PdfFile?> GetFileByName(string name, User user)
     {
-        PdfFile? file = await _applicationContext.PdfFile.AsNoTracking().FirstOrDefaultAsync(p => p.FileName == name && p.User.Id == user.Id);
-        if (file == null)
-        {
-            throw new BusinessException("Arquivo PDF não encontrado.");
-        }
+        PdfFile? file = await _applicationContext
+            .PdfFile
+            .FirstOrDefaultAsync(p => p.FileName == name && p.User.Id == user.Id);
         return file;
     }
 
@@ -35,9 +51,9 @@ public class FileRepository: IFileRepository
         await _applicationContext.SaveChangesAsync();
     }
 
-    public async Task DeleteFileByNameAndUser(string fileName, User user)
+    public async Task DeleteFileByIdAndUser(int id, User user)
     {
-        PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == fileName && p.User.Id == user.Id);
+        PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.Id == id && p.User.Id == user.Id);
         if(file is null)
         {
             throw new BusinessException("Arquivo PDF não encontrado.");
@@ -46,9 +62,19 @@ public class FileRepository: IFileRepository
         _applicationContext.SaveChangesAsync();
     }
 
-    public async Task SetFavoriteFileByName(string name, User user)
+    public async Task<List<PdfFile>> GetPDFsBySearch(string searchTerm, User user)
     {
-        PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == name && p.User.Id == user.Id);
+        return _applicationContext.PdfFile
+            .Where(p => p.User.Id == user.Id)
+            .Where(p =>
+                p.FileContentTsVector.Matches(EF.Functions.PhraseToTsQuery("portuguese", searchTerm))
+            )
+            .ToList();
+    }
+    
+    public async Task SetFavoriteFileById(int id, User user)
+    {
+        PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.Id == id && p.User.Id == user.Id);
         if (file is null)
         {
             throw new BusinessException("Arquivo PDF não encontrado.");
@@ -63,9 +89,9 @@ public class FileRepository: IFileRepository
         _applicationContext.SaveChangesAsync();
     }
 
-    public async Task SetUnfavoriteFileByName(string name, User user)
+    public async Task SetUnfavoriteFileById(int id, User user)
     {
-        PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.FileName == name && p.User.Id == user.Id);
+        PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.Id == id && p.User.Id == user.Id);
         if (file is null)
         {
             throw new BusinessException("Arquivo PDF não encontrado.");
@@ -79,5 +105,21 @@ public class FileRepository: IFileRepository
         file.IsFavorite = false;
         _applicationContext.SaveChangesAsync();
     }
+
+    public async Task<NpgsqlTsVector?> GetTsVectorByConcatString(params string[] stringFields)
+    {
+        string stringFieldConcatened = string.Join(" ", stringFields);
+        var query = _applicationContext.PdfFile
+            .Select(b2File => new 
+            {
+                TsVector = EF.Functions.ToTsVector(
+                    "portuguese",
+                    stringFieldConcatened
+                )
+            })
+            .FirstOrDefault();
+        return query?.TsVector;
+    }
+    
 }
     
