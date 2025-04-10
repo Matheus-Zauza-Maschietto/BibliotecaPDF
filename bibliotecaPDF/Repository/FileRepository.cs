@@ -17,7 +17,7 @@ public class FileRepository: IFileRepository
 
     public async Task<List<PdfFile>> GetPublicPDFsBySearch(string searchTerm)
     {
-        return _applicationContext.PdfFile
+        return _applicationContext.PdfFiles
             .Where(p => p.IsPublic == true)
             .Where(p =>
                 p.FileContentTsVector.Matches(EF.Functions.PhraseToTsQuery("portuguese", searchTerm))
@@ -28,43 +28,43 @@ public class FileRepository: IFileRepository
     public async Task<PdfFile?> GetFileById(int id, User user)
     {
         PdfFile? file = await _applicationContext
-            .PdfFile
+            .PdfFiles
             .FirstOrDefaultAsync(p => p.Id == id && p.User.Id == user.Id);
         return file;
     }
     public async Task<PdfFile?> GetFileByName(string name, User user)
     {
         PdfFile? file = await _applicationContext
-            .PdfFile
+            .PdfFiles
             .FirstOrDefaultAsync(p => p.FileName == name && p.User.Id == user.Id);
         return file;
     }
 
     public async Task<List<PdfFile>> GetFilesByUser(User user)
     {
-        return await _applicationContext.PdfFile.AsNoTracking().Where(p => p.User == user).ToListAsync();
+        return await _applicationContext.PdfFiles.AsNoTracking().Where(p => p.User == user).ToListAsync();
     }
 
     public async Task CreateFile(PdfFile file)
     {
-        _applicationContext.PdfFile.Add(file);
+        _applicationContext.PdfFiles.Add(file);
         await _applicationContext.SaveChangesAsync();
     }
 
     public async Task DeleteFileByIdAndUser(int id, User user)
     {
-        PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.Id == id && p.User.Id == user.Id);
+        PdfFile? file = _applicationContext.PdfFiles.FirstOrDefault(p => p.Id == id && p.User.Id == user.Id);
         if(file is null)
         {
             throw new BusinessException("Arquivo PDF não encontrado.");
         }
-        _applicationContext.PdfFile.Remove(file);
+        _applicationContext.PdfFiles.Remove(file);
         _applicationContext.SaveChangesAsync();
     }
 
     public async Task<List<PdfFile>> GetPDFsBySearch(string searchTerm, User user)
     {
-        return _applicationContext.PdfFile
+        return _applicationContext.PdfFiles
             .Where(p => p.User.Id == user.Id)
             .Where(p =>
                 p.FileContentTsVector.Matches(EF.Functions.PhraseToTsQuery("portuguese", searchTerm))
@@ -74,7 +74,7 @@ public class FileRepository: IFileRepository
     
     public async Task SetFavoriteFileById(int id, User user)
     {
-        PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.Id == id && p.User.Id == user.Id);
+        PdfFile? file = _applicationContext.PdfFiles.FirstOrDefault(p => p.Id == id && p.User.Id == user.Id);
         if (file is null)
         {
             throw new BusinessException("Arquivo PDF não encontrado.");
@@ -91,7 +91,7 @@ public class FileRepository: IFileRepository
 
     public async Task SetUnfavoriteFileById(int id, User user)
     {
-        PdfFile? file = _applicationContext.PdfFile.FirstOrDefault(p => p.Id == id && p.User.Id == user.Id);
+        PdfFile? file = _applicationContext.PdfFiles.FirstOrDefault(p => p.Id == id && p.User.Id == user.Id);
         if (file is null)
         {
             throw new BusinessException("Arquivo PDF não encontrado.");
@@ -109,7 +109,7 @@ public class FileRepository: IFileRepository
     public async Task<NpgsqlTsVector?> GetTsVectorByConcatString(params string[] stringFields)
     {
         string stringFieldConcatened = string.Join(" ", stringFields);
-        var query = _applicationContext.PdfFile
+        var query = _applicationContext.PdfFiles
             .Select(b2File => new 
             {
                 TsVector = EF.Functions.ToTsVector(

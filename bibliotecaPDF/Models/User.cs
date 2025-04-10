@@ -8,6 +8,7 @@ namespace bibliotecaPDF.Models;
 public class User: IdentityUser
 {
     public string Name { get; set; }
+    public List<Message> Messages { get; set; }
     public List<PdfFile> Files { get; set; }
     public Int64 ByteAmounts { get; set; }
     public CapacityPlan CapacityPlan { get; set; }

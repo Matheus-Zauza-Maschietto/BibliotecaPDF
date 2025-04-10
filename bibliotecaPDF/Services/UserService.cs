@@ -42,9 +42,20 @@ public class UserService : IUserService
         return user;
     }
     
-    public async Task<User> GetUserByEmail(string email)
+    public async Task<User> GetUntrackedUserByEmail(string email)
     {
         User? user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            throw new BusinessException("Usuário não encontrado.");
+        }
+
+        return user;
+    }
+    
+    public async Task<User> GetUserByEmailOrUsername(string email)
+    {
+        User? user = await _userRepository.GetUserByEmailOrUsername(email);
         if (user == null)
         {
             throw new BusinessException("Usuário não encontrado.");
@@ -78,7 +89,7 @@ public class UserService : IUserService
         {
             throw new BusinessException(GetIdentityResultErros(result));
         }
-        User nearlyCreatedUser = await GetUserByEmail(userDto.Email);
+        User nearlyCreatedUser = await GetUntrackedUserByEmail(userDto.Email);
         var emailConfirmToken = await GenerateUserActivationToken(nearlyCreatedUser);
         await _emailService.SendUserActivationEmailAsync(newUser.Email, newUser.Id, emailConfirmToken);
     }

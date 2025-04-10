@@ -6,7 +6,8 @@ namespace bibliotecaPDF.Context;
 
 public class ApplicationDbContext : IdentityDbContext<User>
 {
-    public DbSet<PdfFile> PdfFile { get; set; }
+    public DbSet<PdfFile> PdfFiles { get; set; }
+    public DbSet<Message> Messages { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -30,6 +31,10 @@ public class ApplicationDbContext : IdentityDbContext<User>
             .HasMany<PdfFile>(p => p.Files)
             .WithOne(p => p.User);
         
+        builder.Entity<User>()
+            .HasMany<Message>(p => p.Messages)
+            .WithOne(p => p.User);
+        
         builder.Entity<PdfFile>()
             .HasOne(p => p.User)
             .WithMany(p => p.Files);
@@ -37,6 +42,17 @@ public class ApplicationDbContext : IdentityDbContext<User>
         builder.Entity<CapacityPlan>()
             .HasMany<User>(p => p.Users)
             .WithOne(p => p.CapacityPlan);
+        
+        builder.Entity<Message>()
+            .HasOne<User>(p => p.User)
+            .WithMany(p => p.Messages);
+        
+        builder.Entity<Message>()
+            .HasIndex(o => o.DateTime)
+            .IsUnique(false)
+            .IsCreatedConcurrently(false)
+            .IsDescending(true);
+        
         
         builder.Entity<CapacityPlan>()
             .HasData(new CapacityPlan()

@@ -32,7 +32,7 @@ public class FileService : IFileService
 
     public async Task<PdfFile?> UpdateFileById(int id, UpdatePdfFileDTO fileDto, string userEmail)
     {
-        User user = await _userService.GetUserByEmail(userEmail);
+        User user = await _userService.GetUntrackedUserByEmail(userEmail);
 
         PdfFile? pdfFile = await _fileRepository.GetFileById(id, user);
 
@@ -47,7 +47,7 @@ public class FileService : IFileService
     
     public async Task DeleteFileById(int id, string userEmail)
     {
-        User user = await _userService.GetUserByEmail(userEmail);
+        User user = await _userService.GetUntrackedUserByEmail(userEmail);
 
         await GetFileById(id, userEmail);
         
@@ -56,7 +56,7 @@ public class FileService : IFileService
 
     public async Task<PdfFile?> GetFileByName(string pdfName, string userEmail)
     {
-        User user = await _userService.GetUserByEmail(userEmail);
+        User user = await _userService.GetUntrackedUserByEmail(userEmail);
         
         PdfFile? pdfFile = await _fileRepository.GetFileByName(pdfName, user);
 
@@ -70,7 +70,7 @@ public class FileService : IFileService
     
     public async Task<PdfFile?> GetFileById(int id, string userEmail)
     {
-        User user = await _userService.GetUserByEmail(userEmail);
+        User user = await _userService.GetUntrackedUserByEmail(userEmail);
         
         PdfFile? pdfFile = await _fileRepository.GetFileById(id, user);
 
@@ -84,7 +84,7 @@ public class FileService : IFileService
 
     public async Task<List<PdfFile>> SearchPDFs(string query, string userEmail)
     {
-        User user = await _userService.GetUserByEmail(userEmail);
+        User user = await _userService.GetUntrackedUserByEmail(userEmail);
         
         List<PdfFile> pdfFiles = await _fileRepository.GetPDFsBySearch(query, user);
         
@@ -101,7 +101,7 @@ public class FileService : IFileService
     
     public async Task<GetPdfFileDTO?> GetFileContentById(int id, string userEmail)
     {
-        User user = await _userService.GetUserByEmail(userEmail);
+        User user = await _userService.GetUntrackedUserByEmail(userEmail);
 
         PdfFile? pdfFile = await _fileRepository.GetFileById(id, user);
 
@@ -116,7 +116,7 @@ public class FileService : IFileService
 
     public async Task<List<PdfFile>> GetFilesList(string userEmail)
     {
-        User user = await _userService.GetUserByEmail(userEmail);
+        User user = await _userService.GetUntrackedUserByEmail(userEmail);
 
         return  await _fileRepository.GetFilesByUser(user);
     }
@@ -127,7 +127,7 @@ public class FileService : IFileService
         {
             throw new BusinessException("Arquivo vazio.");
         }
-        User user = await _userService.GetUserByEmail(userEmail);
+        User user = await _userService.GetUntrackedUserByEmail(userEmail);
 
         PdfFile? pdfFile = await _fileRepository.GetFileByName(formFile.FileName, user);
         if (pdfFile is not null) throw new BusinessException("Você já possui um pdf com esse nome.");
@@ -184,14 +184,14 @@ public class FileService : IFileService
     
     public async Task FavoriteFileById(int id, string userEmail)
     {
-        User user = await _userService.GetUserByEmail(userEmail);
+        User user = await _userService.GetUntrackedUserByEmail(userEmail);
 
         await _fileRepository.SetFavoriteFileById(id, user);    
     }
 
     public async Task UnfavoriteFileById(int id, string userEmail)
     {
-        User user = await _userService.GetUserByEmail(userEmail);
+        User user = await _userService.GetUntrackedUserByEmail(userEmail);
 
         await _fileRepository.SetUnfavoriteFileById(id, user);
     }

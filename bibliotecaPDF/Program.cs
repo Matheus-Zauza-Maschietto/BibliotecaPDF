@@ -15,10 +15,15 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using B2Net;
 using B2Net.Models;
+using bibliotecaPDF.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Services.AddSignalR();
+
+builder.Logging.AddConsole();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -60,6 +65,21 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["JwtBearerTokenSettings:SecretKey"] ?? "Secret Key não encontrada")
         )
     };
+    
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chathub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserDTOValidator>();
@@ -72,7 +92,10 @@ builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IGenericRepository, GenericRepository>();
 builder.Services.AddScoped<IEmailRepository, EmailRepository>();
+builder.Services.AddScoped<IMessageService, MessageService>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddSingleton<IConnectionMappingService, ConnectionMappingService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddScoped<IB2Client, B2Client>(p =>
 {
@@ -113,14 +136,20 @@ builder.Services.AddSwaggerGen(c =>
             });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials()
+            .SetIsOriginAllowed(_ => true);
+    });
+});
+
 var app = builder.Build();
 //app.ConfigureInitialMigration();
-app.UseCors(cr =>
-{
-    cr.AllowAnyHeader();
-    cr.AllowAnyMethod();
-    cr.AllowAnyOrigin();
-});
+app.UseCors();
 
 if (app.Environment.IsDevelopment())
 {
@@ -133,5 +162,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();
