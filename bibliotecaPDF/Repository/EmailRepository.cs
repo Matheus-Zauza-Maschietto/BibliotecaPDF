@@ -23,7 +23,8 @@ public class EmailRepository : IEmailRepository
         using var client = new SmtpClient(_emailSettings.SmtpServer, _emailSettings.Port)
         {
             Credentials = new NetworkCredential(_emailSettings.UserName, _emailSettings.Password),
-            EnableSsl = true
+            EnableSsl = true,
+            Port = 587
         };
         
         var mailMessage = new MailMessage
