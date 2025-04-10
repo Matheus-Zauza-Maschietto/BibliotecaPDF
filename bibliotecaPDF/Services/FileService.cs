@@ -133,10 +133,9 @@ public class FileService : IFileService
         if (pdfFile is not null) throw new BusinessException("Você já possui um pdf com esse nome.");
         
         byte[] fileBytes = await GetByteArrayFromFormFile(formFile);
-        
-        B2File? b2File = await _backBlazeService.UploadFile(fileBytes, formFile.FileName, user.Id);
         string pdfText = ExtractTextFromPdfBytes(fileBytes);
-        NpgsqlTsVector? tsVector = await _fileRepository.GetTsVectorByConcatString(b2File.FileName, pdfText); 
+        NpgsqlTsVector? tsVector = await _fileRepository.GetTsVectorByConcatString(formFile.FileName, pdfText); 
+        B2File? b2File = await _backBlazeService.UploadFile(fileBytes, formFile.FileName, user.Id);
         PdfFile file = new PdfFile()
         {
             User = user,

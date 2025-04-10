@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using bibliotecaPDF.Enums;
 using bibliotecaPDF.Models.Exceptions;
+using iText.Kernel.Exceptions;
 
 namespace bibliotecaPDF.Controllers;
 
