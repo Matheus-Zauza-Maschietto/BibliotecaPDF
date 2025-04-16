@@ -53,4 +53,4 @@ jobs:
             -e GITHUB_TOKEN="$GITHUB_TOKEN" \
             -v $(pwd):/repo \
             -w /repo \
-            yourusername/my-ai-review:latest
+            ymaschietto/my-ai-review:latest
