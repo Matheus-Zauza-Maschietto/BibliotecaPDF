@@ -73,7 +73,7 @@ public static int GetRandomFibonacci(int maxSequenceLength = 20)
             return StatusCode(500, new ResponseDTO(Status.ERROR, ex.Message));
         }
     }
-    
+        
     [HttpGet("search/public")]
     public async Task<IActionResult> SearchPublicPDF([FromQuery]string query)
     {
