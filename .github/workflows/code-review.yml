@@ -94,13 +94,13 @@ jobs:
               
               # Call OpenAI API
               response = openai.chat.completions.create(
-                  model="o3-mini-high",
+                  model="gpt-4.1",
                   messages=[
                       {"role": "system", "content": "You are a .NET code reviewer. Analyze the code and provide specific, actionable feedback. Focus on C# best practices, SOLID principles, potential bugs, security issues, performance problems, and code quality. Be concise and specific. Format each issue as a separate point."},
                       {"role": "user", "content": f"Review this .NET code:\n\n```\n{code_content}\n```\n\nDiff:\n```\n{diff}\n```\n\n{format_context}"}
                   ],
                   temperature=0.1,
-                  max_tokens=1000
+                  max_tokens=10000
               )
               
               review = response.choices[0].message.content
