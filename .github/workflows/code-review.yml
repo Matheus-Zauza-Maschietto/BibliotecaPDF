@@ -67,7 +67,7 @@ jobs:
                   pass
 
           for file_path in changed_files:
-              # Skip non-.NET code files or files that don't exist
+              # Skip non-.NET code files or files that dont exist
               if not os.path.exists(file_path) or not file_path.endswith((".cs", ".vb", ".fs")):
                   continue
 
@@ -108,7 +108,7 @@ jobs:
               # Post comments to PR
               if review and "no issues" not in review.lower():
                   comment_body = "## .NET AI Code Review for `{}`\n\n{}".format(file_path, review)
-                  comment_cmd = 'gh pr comment {} --body "{}"'.format(pr_number, comment_body)
+                  comment_cmd = "gh pr comment {} --body \\\'{}\\\'".format(pr_number, comment_body)
                   subprocess.run(comment_cmd, shell=True, env={**os.environ, "GITHUB_TOKEN": os.environ["GITHUB_TOKEN"]})
           EOF
           python ai_review.py
