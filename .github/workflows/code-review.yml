@@ -35,13 +35,6 @@ jobs:
           pip install openai
           dotnet tool install -g dotnet-format
           
-      - name: Run .NET code analysis
-        run: |
-          SOLUTION_FILE=$(find . -name "*.sln" -type f | head -n 1)
-          dotnet restore "$SOLUTION_FILE"
-          dotnet build "$SOLUTION_FILE" --no-restore
-          dotnet format "$SOLUTION_FILE" --verify-no-changes --report ./format-report.json ||
-          
       - name: Run AI Code Review
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
