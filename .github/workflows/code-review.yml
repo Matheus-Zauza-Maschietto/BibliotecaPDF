@@ -14,7 +14,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}    
+      
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v41
@@ -35,80 +41,16 @@ jobs:
           pip install openai
           dotnet tool install -g dotnet-format
           
-      - name: AI Code Review
+      - name: Run AI Code Review in Docker
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cat << 'EOF' > ai_review.py
-          import os
-          import openai
-          import json
-          import subprocess
-
-          # Setup
-          openai.api_key = os.environ["OPENAI_API_KEY"]
-          pr_number = os.environ["PR_NUMBER"]
-
-          # Get changed files from environment variable
-          changed_files = "${{ steps.changed-files.outputs.all_changed_files }}".split(" ")
-
-          # Load dotnet format report if exists
-          format_issues = {}
-          if os.path.exists("./format-report.json"):
-              try:
-                  with open("./format-report.json", "r") as f:
-                      format_data = json.load(f)
-                      for document in format_data.get("documents", []):
-                          if "diagnostics" in document:
-                              format_issues[document["filePath"]] = document["diagnostics"]
-              except:
-                  pass
-
-          for file_path in changed_files:
-              # Skip non-.NET code files or files that dont exist
-              if not os.path.exists(file_path) or not file_path.endswith((".cs", ".vb", ".fs")):
-                  continue
-
-              # Get file content
-              with open(file_path, "r") as f:
-                  code_content = f.read()
-
-              if len(code_content.strip()) == 0:
-                  continue
-
-              # Get diff for this file
-              diff_cmd = "git diff --staged -- {}".format(file_path)
-              diff = subprocess.check_output(diff_cmd, shell=True).decode("utf-8")
-              if not diff:
-                  diff_cmd = "git diff origin/main...HEAD -- {}".format(file_path)
-                  diff = subprocess.check_output(diff_cmd, shell=True).decode("utf-8")
-
-              # Add format issues to prompt if available
-              format_context = ""
-              if file_path in format_issues:
-                  format_context = "Dotnet format issues found:\n"
-                  for issue in format_issues[file_path]:
-                      format_context += "- Line {}: {}\n".format(issue.get("line", "?"), issue.get("message", "Unknown issue"))
-
-              # Call OpenAI API
-              response = openai.chat.completions.create(
-                  model="gpt-4.1",
-                  messages=[
-                      {"role": "system", "content": "You are a .NET code reviewer. Analyze the code and provide specific, actionable feedback. Focus on C# best practices, SOLID principles, potential bugs, security issues, performance problems, and code quality. Be concise and specific. Format each issue as a separate point."},
-                      {"role": "user", "content": "Review this .NET code:\n\n```\n{}\n```\n\nDiff:\n```\n{}\n```\n\n{}".format(code_content, diff, format_context)}
-                  ],
-                  temperature=0.1,
-                  max_tokens=10000
-              )
-
-              review = response.choices[0].message.content
-
-              # Post comments to PR
-              if review and "no issues" not in review.lower():
-                  comment_body = "## .NET AI Code Review for `{}`\n\n{}".format(file_path, review)
-                  comment_cmd = "gh pr comment {} --body \\\'{}\\\'".format(pr_number, comment_body)
-                  subprocess.run(comment_cmd, shell=True, env={**os.environ, "GITHUB_TOKEN": os.environ["GITHUB_TOKEN"]})
-          EOF
-          python ai_review.py
+          docker run --rm \
+            -e OPENAI_API_KEY="$OPENAI_API_KEY" \
+            -e PR_NUMBER="$PR_NUMBER" \
+            -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+            -v $(pwd):/repo \
+            -w /repo \
+            yourusername/my-ai-review:latest
