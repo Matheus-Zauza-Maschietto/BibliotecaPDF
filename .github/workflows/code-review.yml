@@ -35,13 +35,13 @@ jobs:
           pip install openai
           dotnet tool install -g dotnet-format
           
-      - name: Run AI Code Review
+      - name: AI Code Review
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python -c '
+          cat << 'EOF' > ai_review.py
           import os
           import openai
           import json
@@ -107,10 +107,8 @@ jobs:
               
               # Post comments to PR
               if review and "no issues" not in review.lower():
-                  comment_cmd = f"""
-                  gh pr comment {pr_number} --body "## .NET AI Code Review for \`{file_path}\`
-
-                  {review}"
-                  """
+                  comment_body = f"## .NET AI Code Review for `{file_path}`\n\n{review}"
+                  comment_cmd = f'gh pr comment {pr_number} --body "{comment_body}"'
                   subprocess.run(comment_cmd, shell=True, env={**os.environ, "GITHUB_TOKEN": os.environ["GITHUB_TOKEN"]})
-          '
+          EOF
+          python ai_review.py
