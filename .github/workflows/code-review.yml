@@ -90,7 +90,7 @@ jobs:
               if file_path in format_issues:
                   format_context = "Dotnet format issues found:\n"
                   for issue in format_issues[file_path]:
-                      format_context += f"- Line {issue.get(\"line\", \"?\")}: {issue.get(\"message\", \"Unknown issue\")}\n"
+                      format_context += "- Line {}: {}\n".format(issue.get("line", "?"), issue.get("message", "Unknown issue"))
               
               # Call OpenAI API
               response = openai.chat.completions.create(
