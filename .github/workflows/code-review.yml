@@ -67,7 +67,7 @@ jobs:
                   pass
 
           for file_path in changed_files:
-              # Skip non-.NET code files or files that don't exist
+              # Skip non-.NET code files or files that dont exist
               if not os.path.exists(file_path) or not file_path.endswith((".cs", ".vb", ".fs")):
                   continue
                   
