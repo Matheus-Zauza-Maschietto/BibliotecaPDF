@@ -52,5 +52,5 @@ jobs:
             -e PR_NUMBER="$PR_NUMBER" \
             -e GITHUB_TOKEN="$GITHUB_TOKEN" \
             -v $(pwd):/repo \
-            -w /repo \
+            -w /app \
             ymaschietto/my-ai-review:latest
