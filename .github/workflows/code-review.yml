@@ -67,48 +67,48 @@ jobs:
                   pass
 
           for file_path in changed_files:
-              # Skip non-.NET code files or files that dont exist
+              # Skip non-.NET code files or files that don't exist
               if not os.path.exists(file_path) or not file_path.endswith((".cs", ".vb", ".fs")):
                   continue
-                  
+
               # Get file content
               with open(file_path, "r") as f:
                   code_content = f.read()
-              
+
               if len(code_content.strip()) == 0:
                   continue
-                  
+
               # Get diff for this file
-              diff_cmd = f"git diff --staged -- {file_path}"
+              diff_cmd = "git diff --staged -- {}".format(file_path)
               diff = subprocess.check_output(diff_cmd, shell=True).decode("utf-8")
               if not diff:
-                  diff_cmd = f"git diff origin/main...HEAD -- {file_path}"
+                  diff_cmd = "git diff origin/main...HEAD -- {}".format(file_path)
                   diff = subprocess.check_output(diff_cmd, shell=True).decode("utf-8")
-              
+
               # Add format issues to prompt if available
               format_context = ""
               if file_path in format_issues:
                   format_context = "Dotnet format issues found:\n"
                   for issue in format_issues[file_path]:
                       format_context += "- Line {}: {}\n".format(issue.get("line", "?"), issue.get("message", "Unknown issue"))
-              
+
               # Call OpenAI API
               response = openai.chat.completions.create(
                   model="gpt-4.1",
                   messages=[
                       {"role": "system", "content": "You are a .NET code reviewer. Analyze the code and provide specific, actionable feedback. Focus on C# best practices, SOLID principles, potential bugs, security issues, performance problems, and code quality. Be concise and specific. Format each issue as a separate point."},
-                      {"role": "user", "content": f"Review this .NET code:\n\n```\n{code_content}\n```\n\nDiff:\n```\n{diff}\n```\n\n{format_context}"}
+                      {"role": "user", "content": "Review this .NET code:\n\n```\n{}\n```\n\nDiff:\n```\n{}\n```\n\n{}".format(code_content, diff, format_context)}
                   ],
                   temperature=0.1,
                   max_tokens=10000
               )
-              
+
               review = response.choices[0].message.content
-              
+
               # Post comments to PR
               if review and "no issues" not in review.lower():
-                  comment_body = f"## .NET AI Code Review for `{file_path}`\n\n{review}"
-                  comment_cmd = f'gh pr comment {pr_number} --body "{comment_body}"'
+                  comment_body = "## .NET AI Code Review for `{}`\n\n{}".format(file_path, review)
+                  comment_cmd = 'gh pr comment {} --body "{}"'.format(pr_number, comment_body)
                   subprocess.run(comment_cmd, shell=True, env={**os.environ, "GITHUB_TOKEN": os.environ["GITHUB_TOKEN"]})
           EOF
           python ai_review.py
