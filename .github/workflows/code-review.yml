@@ -111,7 +111,8 @@ jobs:
                       model=GPT_MODEL,
                       messages=[
                           {"role": "system", "content": "You are a senior C# developer providing code review comments."},
-                          {"role": "user", "content": prompt}
+                          {"role": "user", "content": prompt},
+                          {"role": "system", "content": "Sempre responda em português do Brasil."}
                       ],
                       temperature=0.3,
                       max_tokens=2000
