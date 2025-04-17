@@ -150,7 +150,7 @@ jobs:
                 For each issue you find, format your response as JSON objects in this exact format:
                 [
                 {{
-                    "line": "the line number in the diff where the issue occurs (line starting with + or context lines)",
+                    "line": "the line number in the diff where the issue occurs (line starting with + or context lines). You need to insert here the line number of the file",
                     "code": "the problematic code snippet",
                     "issue": "brief description of the issue",
                     "suggestion": "suggested code improvement",
