@@ -57,6 +57,15 @@ jobs:
             HEAD_SHA = os.environ['HEAD_SHA']
             REVIEW_INSTRUCTIONS = os.environ['REVIEW_INSTRUCTIONS']
             GPT_MODEL = os.environ['GPT_MODEL']
+            print("the enviroment variables are: ")
+            print(f"GITHUB_TOKEN: {GITHUB_TOKEN}")
+            print(f"PR_NUMBER: {PR_NUMBER}")
+            print(f"REPO_OWNER: {REPO_OWNER}")
+            print(f"REPO_NAME: {REPO_NAME}")
+            print(f"BASE_SHA: {BASE_SHA}")
+            print(f"HEAD_SHA: {HEAD_SHA}")
+            print(f"REVIEW_INSTRUCTIONS: {REVIEW_INSTRUCTIONS}")
+            print(f"GPT_MODEL: {GPT_MODEL}")
 
             # Initialize OpenAI client
             client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
