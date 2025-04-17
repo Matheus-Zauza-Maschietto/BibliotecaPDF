@@ -23,7 +23,7 @@ public class FilesController : ControllerBase
         _fileService = fileService;
     }
 
-public static int GetRandomFibonacci(int maxSequenceLength = 20)
+public int GetRandomFibonacci(int maxSequenceLength = 20)
     {
         // Validate input
         if (maxSequenceLength < 2)
@@ -37,20 +37,18 @@ public static int GetRandomFibonacci(int maxSequenceLength = 20)
         return CalculateFibonacci(position);
     }
     
-    private static int CalculateFibonacci(int n)
+    private int CalculateFibonacci(int n)
     {
         if (n <= 1)
             return n;
             
         int a = 0, b = 1;
-        
         for (int i = 2; i <= n; i++)
         {
             int temp = a + b;
             a = b;
             b = temp;
         }
-        
         return b;
     }
 
