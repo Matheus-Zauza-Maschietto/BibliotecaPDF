@@ -1,122 +1,281 @@
-name: .NET AI Code Review
+name: GPT-4.1 C# Code Review
 
 on:
   pull_request:
     types: [opened, synchronize]
+    paths:
+      - '**.cs'
 
 jobs:
-  dotnet-ai-code-review:
+  code-review:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
+    
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v41
-        
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '7.0.x'
-          
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
           
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install openai
-          dotnet tool install -g dotnet-format
+          pip install openai requests
           
-      - name: Run .NET code analysis
-        run: |
-          dotnet restore
-          dotnet build --no-restore
-          dotnet format --verify-no-changes --report ./format-report.json || true
-          
-      - name: Run AI Code Review
+      - name: GPT-4.1 C# Code Review
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          REVIEW_INSTRUCTIONS: ${{ vars.CODE_REVIEW_INSTRUCTIONS || 'Focus on code quality, performance, security, and C# best practices.' }}
+          GPT_MODEL: ${{ vars.GPT_MODEL || 'gpt-4.1' }}
         run: |
-          python -c '
-          import os
-          import openai
-          import json
-          import subprocess
-          
-          # Setup
-          openai.api_key = os.environ["OPENAI_API_KEY"]
-          pr_number = os.environ["PR_NUMBER"]
-          
-          # Get changed files from environment variable
-          changed_files = "${{ steps.changed-files.outputs.all_changed_files }}".split(" ")
-          
-          # Load dotnet format report if exists
-          format_issues = {}
-          if os.path.exists("./format-report.json"):
-              try:
-                  with open("./format-report.json", "r") as f:
-                      format_data = json.load(f)
-                      for document in format_data.get("documents", []):
-                          if "diagnostics" in document:
-                              format_issues[document["filePath"]] = document["diagnostics"]
-              except:
-                  pass
-          
-          for file_path in changed_files:
-              # Skip non-.NET code files or files that don\'t exist
-              if not os.path.exists(file_path) or not file_path.endswith((".cs", ".vb", ".fs")):
-                  continue
-                  
-              # Get file content
-              with open(file_path, "r") as f:
-                  code_content = f.read()
-              
-              if len(code_content.strip()) == 0:
-                  continue
-                  
-              # Get diff for this file
-              diff_cmd = f"git diff --staged -- {file_path}"
-              diff = subprocess.check_output(diff_cmd, shell=True).decode("utf-8")
-              if not diff:
-                  diff_cmd = f"git diff origin/main...HEAD -- {file_path}"
-                  diff = subprocess.check_output(diff_cmd, shell=True).decode("utf-8")
-              
-              # Add format issues to prompt if available
-              format_context = ""
-              if file_path in format_issues:
-                  format_context = "Dotnet format issues found:\n"
-                  for issue in format_issues[file_path]:
-                      format_context += f"- Line {issue.get(\'line\', \'?\')}: {issue.get(\'message\', \'Unknown issue\')}\n"
-              
-              # Call OpenAI API
-              response = openai.chat.completions.create(
-                  model="o3-mini-high",
-                  messages=[
-                      {"role": "system", "content": "You are a .NET code reviewer. Analyze the code and provide specific, actionable feedback. Focus on C# best practices, SOLID principles, potential bugs, security issues, performance problems, and code quality. Be concise and specific. Format each issue as a separate point."},
-                      {"role": "user", "content": f"Review this .NET code:\n\n```\n{code_content}\n```\n\nDiff:\n```\n{diff}\n```\n\n{format_context}"}
-                  ],
-                  temperature=0.1,
-                  max_tokens=1000
-              )
-              
-              review = response.choices[0].message.content
-              
-              # Post comments to PR
-              if review and "no issues" not in review.lower():
-                  comment_cmd = f"""
-                  gh pr comment {pr_number} --body "## .NET AI Code Review for \`{file_path}\`
+            cat > code_review.py << 'EOL'
+            import os
+            import subprocess
+            import requests
+            import re
+            from openai import OpenAI
 
-                  {review}"
-                  """
-                  subprocess.run(comment_cmd, shell=True, env={**os.environ, "GITHUB_TOKEN": os.environ["GITHUB_TOKEN"]})
-          '
+            # Configuration
+            GITHUB_TOKEN = os.environ['GITHUB_TOKEN']
+            PR_NUMBER = os.environ['PR_NUMBER']
+            REPO_OWNER = os.environ['REPO_OWNER']
+            REPO_NAME = os.environ['REPO_NAME']
+            BASE_SHA = os.environ['BASE_SHA']
+            HEAD_SHA = os.environ['HEAD_SHA']
+            REVIEW_INSTRUCTIONS = os.environ['REVIEW_INSTRUCTIONS']
+            GPT_MODEL = os.environ['GPT_MODEL']
+            print("the enviroment variables are: ")
+            print(f"GITHUB_TOKEN: {GITHUB_TOKEN}")
+            print(f"PR_NUMBER: {PR_NUMBER}")
+            print(f"REPO_OWNER: {REPO_OWNER}")
+            print(f"REPO_NAME: {REPO_NAME}")
+            print(f"BASE_SHA: {BASE_SHA}")
+            print(f"HEAD_SHA: {HEAD_SHA}")
+            print(f"REVIEW_INSTRUCTIONS: {REVIEW_INSTRUCTIONS}")
+            print(f"GPT_MODEL: {GPT_MODEL}")
+
+            # Initialize OpenAI client
+            client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
+
+            def get_changed_csharp_files():
+                """Get changed C# files in the PR"""
+                cmd = ['git', 'diff', '--name-only', BASE_SHA, HEAD_SHA]
+                result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+                return [f for f in result.stdout.strip().split('\n') if f.endswith('.cs') and f.strip()]
+
+            def get_file_diff(file_path):
+                """Get diff for a specific file"""
+                cmd = ['git', 'diff', BASE_SHA, HEAD_SHA, '--', file_path]
+                try:
+                    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+                    return result.stdout
+                except:
+                    return None
+
+            def get_file_content(file_path):
+                """Get current content of the file"""
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        return f.read()
+                except Exception as e:
+                    print(f"Error reading file {file_path}: {e}")
+                    return None
+
+            def parse_diff_to_line_map(diff):
+                """Parse diff to map hunk positions to actual file line numbers"""
+                line_map = {}
+                current_line = 0
+                hunk_line = 0
+
+                lines = diff.split('\n')
+                for line in lines:
+                    if line.startswith('@@'):
+                        match = re.search(r'\+(\d+)', line)
+                        if match:
+                            current_line = int(match.group(1)) - 1
+                            hunk_line = 0
+                    elif not line.startswith('---') and not line.startswith('+++'):
+                        hunk_line += 1
+                        if line.startswith('+'):
+                            current_line += 1
+                            line_map[hunk_line] = current_line
+                        elif line.startswith('-'):
+                            pass
+                        else:
+                            current_line += 1
+
+                return line_map
+
+            def review_code(file_path, diff, file_content):
+                """Send code diff to GPT for review with line-specific comments"""
+                if not diff or diff.strip() == '':
+                    return None
+
+                prompt = f"""
+                You are a C# code reviewer. Review the following diff and provide specific feedback for each issue:
+
+                File: {file_path}
+
+                {REVIEW_INSTRUCTIONS}
+
+                ```diff
+                {diff}
+                ```
+
+                Full file content:
+                ```csharp
+                {file_content}
+                ```
+
+                Focus on:
+                1. Code quality issues
+                2. Potential bugs
+                3. Performance concerns
+                4. Security vulnerabilities
+                5. C# best practices
+
+                For each issue you find, format your response as JSON objects in this exact format:
+                [
+                {{
+                    "line": "the line number in the diff where the issue occurs (line starting with + or context lines). You need to insert here the line number of the file",
+                    "code": "the problematic code snippet",
+                    "issue": "brief description of the issue",
+                    "suggestion": "suggested code improvement",
+                    "explanation": "why this change is recommended"
+                }},
+                // more issues if found
+                ]
+
+                If there are no issues, respond with "LGTM" (Looks Good To Me).
+                """
+
+                try:
+                    response = client.chat.completions.create(
+                        model=GPT_MODEL,
+                        messages=[
+                            {"role": "system", "content": "You are a senior C# developer providing code review comments."},
+                            {"role": "user", "content": prompt},
+                            {"role": "system", "content": "Sempre responda em português do Brasil."}
+                        ],
+                        temperature=0.3,
+                        max_tokens=2000,
+                        response_format={"type": "json_object"}
+                    )
+
+                    review = response.choices[0].message.content.strip()
+                    if review == "LGTM":
+                        return None
+
+                    try:
+                        import json
+                        review_data = json.loads(review)
+                        if isinstance(review_data, dict) and "issues" in review_data:
+                            return review_data["issues"]
+                        elif isinstance(review_data, list):
+                            return review_data
+                        else:
+                            return [{"line": 1, "issue": "Erro ao analisar resposta", "explanation": review}]
+                    except json.JSONDecodeError:
+                        return [{"line": 1, "issue": "Erro no formato da resposta", "explanation": review}]
+
+                except Exception as e:
+                    return [{"line": 1, "issue": f"Erro ao revisar código: {e}", "explanation": str(e)}]
+
+            def format_suggestion_comment(issue):
+                """Format a GitHub suggestion comment"""
+                comment = f"**Problema**: {issue['issue']}\n\n"
+
+                if 'suggestion' in issue and issue['suggestion']:
+                    comment += "```suggestion\n"
+                    comment += issue['suggestion']
+                    comment += "\n```\n\n"
+
+                if 'explanation' in issue:
+                    comment += f"**Explicação**: {issue['explanation']}"
+
+                return comment
+
+            def add_pr_comment(file_path, comment, line_number=None, suggestion=False):
+                """Add comment to PR, optionally as a suggestion"""
+                headers = {
+                    'Authorization': f'token {GITHUB_TOKEN}',
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+
+                if line_number:
+                    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/pulls/{PR_NUMBER}/comments'
+                    payload = {
+                        'body': comment,
+                        'commit_id': HEAD_SHA,
+                        'path': file_path,
+                        'line': line_number,
+                        'side': 'RIGHT'
+                    }
+                else:
+                    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/issues/{PR_NUMBER}/comments'
+                    payload = {'body': f"### Revisão para {file_path}\n\n{comment}"}
+
+                response = requests.post(url, headers=headers, json=payload)
+
+                if response.status_code not in (201, 200):
+                    print(f"Error adding comment (status {response.status_code}): {response.text}")
+                    if line_number:
+                        add_pr_comment(file_path, comment, None)
+
+            def main():
+                changed_files = get_changed_csharp_files()
+
+                if not changed_files:
+                    print("No C# files changed.")
+                    return
+
+                print(f"Reviewing {len(changed_files)} C# files...")
+
+                for file_path in changed_files:
+                    diff = get_file_diff(file_path)
+                    if not diff:
+                        continue
+
+                    file_content = get_file_content(file_path)
+                    issues = review_code(file_path, diff, file_content)
+
+                    if not issues:
+                        print(f"No issues found in {file_path}")
+                        continue
+
+                    line_map = parse_diff_to_line_map(diff)
+
+                    summary = f"## Revisão de código C# por GPT-4.1\n\nEncontrados {len(issues)} problemas no arquivo."
+                    add_pr_comment(file_path, summary, None)
+
+                    for issue in issues:
+                        try:
+                            diff_line = int(issue.get('line', 1))
+                            actual_line = line_map.get(diff_line, 1)
+
+                            comment = format_suggestion_comment(issue)
+
+                            add_pr_comment(file_path, comment, actual_line, True)
+
+                        except Exception as e:
+                            print(f"Error processing issue: {e}")
+                            comment = f"**Linha {issue.get('line', '?')}**: {format_suggestion_comment(issue)}"
+                            add_pr_comment(file_path, comment, None)
+
+            if __name__ == "__main__":
+                main()
+            EOL
+            python code_review.py

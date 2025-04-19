@@ -22,6 +22,35 @@ public class FilesController : ControllerBase
         _fileService = fileService;
     }
 
+public int GetRandomFibonacci(int maxSequenceLength = 20)
+    {
+        // Validate input
+        if (maxSequenceLength < 2)
+            throw new ArgumentException("Sequence length must be at least 2", nameof(maxSequenceLength));
+            
+        // Generate a random position in the sequence
+        Random random = new Random();
+        int position = random.Next(0, maxSequenceLength);
+        
+        // Calculate Fibonacci number at that position
+        return CalculateFibonacci(position);
+    }
+    
+    private int CalculateFibonacci(int n)
+    {
+        if (n <= 1)
+            return n;
+            
+        int a = 0, b = 1;
+        for (int i = 2; i <= n; i++)
+        {
+            int temp = a + b;
+            a = b;
+            b = temp;
+        }
+        return b;
+    }
+
     [HttpGet("search")]
     public async Task<IActionResult> SearchPDF([FromQuery]string query)
     {
@@ -29,6 +58,7 @@ public class FilesController : ControllerBase
         {
             string? userEmailClaim = User.FindFirstValue(ClaimTypes.Email);
             List<PdfFile> pdfs = await _fileService.SearchPDFs(query, userEmailClaim ?? "");
+            GetRandomFibonacci(10);
             return Ok(new ResponseDTO(Status.OK, pdfs.Select(p => new PdfFileDTO(p))));
         }
         catch (BusinessException ex)
@@ -40,7 +70,7 @@ public class FilesController : ControllerBase
             return StatusCode(500, new ResponseDTO(Status.ERROR, ex.Message));
         }
     }
-    
+        
     [HttpGet("search/public")]
     public async Task<IActionResult> SearchPublicPDF([FromQuery]string query)
     {
