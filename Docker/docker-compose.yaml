@@ -1,7 +1,7 @@
 version: "latest"
 services:
   db:
-    container_name: "bibliotecaDB"
+    container_name: "biblioteca-postgres"
     image: postgres
     ports:
       - 5432:5432
@@ -10,9 +10,14 @@ services:
       - POSTGRES_PASSWORD=Senha123!
     networks:
       - "bibliotecaPDF"
-    #volumes:
-    #  - "./db_volume:/var/opt/mssql/data"
-  
+  cache:
+    container_name: biblioteca-cache
+    image: redis:latest
+    networks:
+      - "bibliotecaPDF"
+    ports:
+      - "6379:6379"  
+    restart: always
   # app:
   #   depends_on: 
   #     - db

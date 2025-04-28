@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Security.Claims;
 using bibliotecaPDF.DTOs;
 using bibliotecaPDF.Models;
+using bibliotecaPDF.Models.Enums;
 using bibliotecaPDF.Services;
 using bibliotecaPDF.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -15,9 +16,16 @@ public class ChatHub : Hub
     private IConnectionMappingService _connectionMappingService;
     private readonly IMessageService _messageService;
     private readonly IUserService _userService;
+    private readonly IRedisObserverService _redisObserverService;
 
-    public ChatHub(IMessageService messageService, IUserService userService, IConnectionMappingService connectionMappingService)
+    public ChatHub(
+        IMessageService messageService, 
+        IUserService userService, 
+        IConnectionMappingService connectionMappingService, 
+        IRedisObserverService redisObserverService
+    )
     {
+        _redisObserverService = redisObserverService;
         _messageService = messageService;
         _userService = userService;
         _connectionMappingService = connectionMappingService;
@@ -46,6 +54,7 @@ public class ChatHub : Hub
         _connectionMappingService.TryGet(Context.ConnectionId, out User user);
         Message createdMessage = await _messageService.SendMessageAsync(user, message);
         await Clients.All.SendAsync("ReceiveMessage", new MessageGetDTO(createdMessage));
+        await _redisObserverService.PublishAsync(RedisTopics.MESSAGES.ToString(), new MessageGetDTO(createdMessage));
     }
 
     public async Task GetLastMessages(int pageNumber)

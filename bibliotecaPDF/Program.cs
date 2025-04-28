@@ -16,6 +16,7 @@ using System.Text;
 using B2Net;
 using B2Net.Models;
 using bibliotecaPDF.Controllers;
+using bibliotecaPDF.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,130 +26,30 @@ builder.Services.AddSignalR();
 
 builder.Logging.AddConsole();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.ConfigurePostgresConnection(builder.Configuration);
 
-builder.Services.AddIdentity<User, IdentityRole>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = true; 
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 5;
-})
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.ConfigureRedisConnection(builder.Configuration);
 
-builder.Services.AddAuthorization(options =>
-{
-    options.FallbackPolicy = new AuthorizationPolicyBuilder()
-    .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
-    .RequireAuthenticatedUser()
-    .Build();
-});
+builder.Services.ConfigureUser();
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options => {
-    options.TokenValidationParameters = new TokenValidationParameters()
-    {
-        ValidateActor = true,
-        ValidateAudience = true,
-        ValidateIssuer = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["JwtBearerTokenSettings:Issuer"],
-        ValidAudience = builder.Configuration["JwtBearerTokenSettings:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["JwtBearerTokenSettings:SecretKey"] ?? "Secret Key não encontrada")
-        )
-    };
-    
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = context =>
-        {
-            var accessToken = context.Request.Query["access_token"];
+builder.Services.ConfigureAutorization(builder.Configuration);
 
-            var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/chathub"))
-            {
-                context.Token = accessToken;
-            }
-            return Task.CompletedTask;
-        }
-    };
-});
+builder.Services.ConfigureAuthentication(builder.Configuration);
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserDTOValidator>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<JsonWebTokensService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IBackBlazeService, BackBlazeService>();
-builder.Services.AddScoped<IBackBlazeRepository, BackBlazeRepository>();
-builder.Services.AddScoped<IFileRepository, FileRepository>();
-builder.Services.AddScoped<IFileService, FileService>();
-builder.Services.AddScoped<IGenericRepository, GenericRepository>();
-builder.Services.AddScoped<IEmailRepository, EmailRepository>();
-builder.Services.AddScoped<IMessageService, MessageService>();
-builder.Services.AddScoped<IMessageRepository, MessageRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddSingleton<IConnectionMappingService, ConnectionMappingService>();
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-builder.Services.AddScoped<IB2Client, B2Client>(p =>
-{
-    return new B2Client(new B2Options()
-    {
-        KeyId = builder.Configuration["BackBlaze:KeyId"],
-        ApplicationKey = builder.Configuration["BackBlaze:ApplicationKey"],
-        BucketId = builder.Configuration["BackBlaze:BucketId"] 
-    });;
-});
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Biblioteca PDF", Version = "v1" });
-    var securityScheme = new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Insira o token JWT desta forma: Bearer {seu token}"
-    };
-    c.AddSecurityDefinition("Bearer", securityScheme);
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    new string[] {}
-                }
-            });
-});
 
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
-            .SetIsOriginAllowed(_ => true);
-    });
-});
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+
+builder.Services.ConfigureServices(builder.Configuration);
+
+builder.Services.ConfigureSwagger();
+
+builder.Services.ConfigureCors();
 
 var app = builder.Build();
-//app.ConfigureInitialMigration();
+
+app.ConfigureInitialMigration();
+
 app.UseCors();
 
 if (app.Environment.IsDevelopment())

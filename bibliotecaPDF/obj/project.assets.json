@@ -1298,6 +1298,22 @@
           }
         }
       },
+      "Pipelines.Sockets.Unofficial/2.2.8": {
+        "type": "package",
+        "dependencies": {
+          "System.IO.Pipelines": "5.0.1"
+        },
+        "compile": {
+          "lib/net5.0/Pipelines.Sockets.Unofficial.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net5.0/Pipelines.Sockets.Unofficial.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
         "type": "package",
         "runtimeTargets": {
@@ -1479,6 +1495,23 @@
           "runtimes/ubuntu.16.10-x64/native/System.Security.Cryptography.Native.OpenSsl.so": {
             "assetType": "native",
             "rid": "ubuntu.16.10-x64"
+          }
+        }
+      },
+      "StackExchange.Redis/2.8.31": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "6.0.0",
+          "Pipelines.Sockets.Unofficial": "2.2.8"
+        },
+        "compile": {
+          "lib/net8.0/StackExchange.Redis.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/StackExchange.Redis.dll": {
+            "related": ".xml"
           }
         }
       },
@@ -2069,7 +2102,7 @@
       "System.IO.Pipelines/7.0.0": {
         "type": "package",
         "compile": {
-          "lib/net7.0/_._": {
+          "lib/net7.0/System.IO.Pipelines.dll": {
             "related": ".xml"
           }
         },
@@ -5518,6 +5551,29 @@
         "postgresql.png"
       ]
     },
+    "Pipelines.Sockets.Unofficial/2.2.8": {
+      "sha512": "zG2FApP5zxSx6OcdJQLbZDk2AVlN2BNQD6MorwIfV6gVj0RRxWPEp2LXAxqDGZqeNV1Zp0BNPcNaey/GXmTdvQ==",
+      "type": "package",
+      "path": "pipelines.sockets.unofficial/2.2.8",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net461/Pipelines.Sockets.Unofficial.dll",
+        "lib/net461/Pipelines.Sockets.Unofficial.xml",
+        "lib/net472/Pipelines.Sockets.Unofficial.dll",
+        "lib/net472/Pipelines.Sockets.Unofficial.xml",
+        "lib/net5.0/Pipelines.Sockets.Unofficial.dll",
+        "lib/net5.0/Pipelines.Sockets.Unofficial.xml",
+        "lib/netcoreapp3.1/Pipelines.Sockets.Unofficial.dll",
+        "lib/netcoreapp3.1/Pipelines.Sockets.Unofficial.xml",
+        "lib/netstandard2.0/Pipelines.Sockets.Unofficial.dll",
+        "lib/netstandard2.0/Pipelines.Sockets.Unofficial.xml",
+        "lib/netstandard2.1/Pipelines.Sockets.Unofficial.dll",
+        "lib/netstandard2.1/Pipelines.Sockets.Unofficial.xml",
+        "pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
+        "pipelines.sockets.unofficial.nuspec"
+      ]
+    },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {
       "sha512": "HdSSp5MnJSsg08KMfZThpuLPJpPwE5hBXvHwoKWosyHHfe8Mh5WKT0ylEOf6yNzX6Ngjxe4Whkafh5q7Ymac4Q==",
       "type": "package",
@@ -5754,6 +5810,29 @@
         "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
         "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.nuspec",
         "runtimes/ubuntu.16.10-x64/native/System.Security.Cryptography.Native.OpenSsl.so"
+      ]
+    },
+    "StackExchange.Redis/2.8.31": {
+      "sha512": "RCHVQa9Zke8k0oBgJn1Yl6BuYy8i6kv+sdMObiH60nOwD6QvWAjxdDwOm+LO78E8WsGiPqgOuItkz98fPS6haQ==",
+      "type": "package",
+      "path": "stackexchange.redis/2.8.31",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net461/StackExchange.Redis.dll",
+        "lib/net461/StackExchange.Redis.xml",
+        "lib/net472/StackExchange.Redis.dll",
+        "lib/net472/StackExchange.Redis.xml",
+        "lib/net6.0/StackExchange.Redis.dll",
+        "lib/net6.0/StackExchange.Redis.xml",
+        "lib/net8.0/StackExchange.Redis.dll",
+        "lib/net8.0/StackExchange.Redis.xml",
+        "lib/netcoreapp3.1/StackExchange.Redis.dll",
+        "lib/netcoreapp3.1/StackExchange.Redis.xml",
+        "lib/netstandard2.0/StackExchange.Redis.dll",
+        "lib/netstandard2.0/StackExchange.Redis.xml",
+        "stackexchange.redis.2.8.31.nupkg.sha512",
+        "stackexchange.redis.nuspec"
       ]
     },
     "Swashbuckle.AspNetCore/7.2.0": {
@@ -9592,24 +9671,25 @@
       "Microsoft.Identity.Client >= 4.67.2",
       "Microsoft.VisualStudio.Azure.Containers.Tools.Targets >= 1.21.0",
       "Npgsql.EntityFrameworkCore.PostgreSQL >= 9.0.3",
+      "StackExchange.Redis >= 2.8.31",
       "Swashbuckle.AspNetCore >= 7.2.0",
       "itext7 >= 9.0.0"
     ]
   },
   "packageFolders": {
-    "/home/maquina-de-guerra/.nuget/packages/": {}
+    "/home/matheus/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/maquina-de-guerra/Documents/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj",
+      "projectUniqueName": "/home/matheus/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj",
       "projectName": "bibliotecaPDF",
-      "projectPath": "/home/maquina-de-guerra/Documents/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj",
-      "packagesPath": "/home/maquina-de-guerra/.nuget/packages/",
-      "outputPath": "/home/maquina-de-guerra/Documents/github/BibliotecaPDF/bibliotecaPDF/obj/",
+      "projectPath": "/home/matheus/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj",
+      "packagesPath": "/home/matheus/.nuget/packages/",
+      "outputPath": "/home/matheus/github/BibliotecaPDF/bibliotecaPDF/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/maquina-de-guerra/.nuget/NuGet/NuGet.Config"
+        "/home/matheus/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -9631,9 +9711,9 @@
       "restoreAuditProperties": {
         "enableAudit": "true",
         "auditLevel": "low",
-        "auditMode": "all"
+        "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.100"
+      "SdkAnalysisLevel": "9.0.200"
     },
     "frameworks": {
       "net9.0": {
@@ -9677,6 +9757,10 @@
             "target": "Package",
             "version": "[9.0.3, )"
           },
+          "StackExchange.Redis": {
+            "target": "Package",
+            "version": "[2.8.31, )"
+          },
           "Swashbuckle.AspNetCore": {
             "target": "Package",
             "version": "[7.2.0, )"
@@ -9705,80 +9789,8 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/home/maquina-de-guerra/.dotnet/sdk/9.0.100/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/home/matheus/.local/share/mise/installs/dotnet/9.0.203/sdk/9.0.203/PortableRuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'Microsoft.NETCore.Jit' 1.0.2 has a known high severity vulnerability, https://github.com/advisories/GHSA-xcvr-qv8h-m7xw",
-      "libraryId": "Microsoft.NETCore.Jit",
-      "targetGraphs": [
-        "net9.0"
-      ]
-    },
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'System.Net.Http' 4.1.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-6xh7-4v2w-36q6",
-      "libraryId": "System.Net.Http",
-      "targetGraphs": [
-        "net9.0"
-      ]
-    },
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'System.Net.Http' 4.1.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-7jgj-8wvc-jh57",
-      "libraryId": "System.Net.Http",
-      "targetGraphs": [
-        "net9.0"
-      ]
-    },
-    {
-      "code": "NU1902",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'System.Net.Http' 4.1.1 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-ch6p-4jcm-h8vh",
-      "libraryId": "System.Net.Http",
-      "targetGraphs": [
-        "net9.0"
-      ]
-    },
-    {
-      "code": "NU1902",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'System.Net.Http' 4.1.1 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-j8f4-2w4p-mhjc",
-      "libraryId": "System.Net.Http",
-      "targetGraphs": [
-        "net9.0"
-      ]
-    },
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'System.Net.Http' 4.1.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-qhqf-ghgh-x2m4",
-      "libraryId": "System.Net.Http",
-      "targetGraphs": [
-        "net9.0"
-      ]
-    },
-    {
-      "code": "NU1903",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Package 'System.Security.Cryptography.X509Certificates' 4.1.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-7mfr-774f-w5r9",
-      "libraryId": "System.Security.Cryptography.X509Certificates",
-      "targetGraphs": [
-        "net9.0"
-      ]
-    }
-  ]
+  }
 }

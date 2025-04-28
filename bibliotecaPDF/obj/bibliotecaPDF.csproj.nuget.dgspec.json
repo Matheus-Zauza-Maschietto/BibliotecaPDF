@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/maquina-de-guerra/Documents/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj": {}
+    "/home/matheus/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj": {}
   },
   "projects": {
-    "/home/maquina-de-guerra/Documents/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj": {
+    "/home/matheus/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/maquina-de-guerra/Documents/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj",
+        "projectUniqueName": "/home/matheus/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj",
         "projectName": "bibliotecaPDF",
-        "projectPath": "/home/maquina-de-guerra/Documents/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj",
-        "packagesPath": "/home/maquina-de-guerra/.nuget/packages/",
-        "outputPath": "/home/maquina-de-guerra/Documents/github/BibliotecaPDF/bibliotecaPDF/obj/",
+        "projectPath": "/home/matheus/github/BibliotecaPDF/bibliotecaPDF/bibliotecaPDF.csproj",
+        "packagesPath": "/home/matheus/.nuget/packages/",
+        "outputPath": "/home/matheus/github/BibliotecaPDF/bibliotecaPDF/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/maquina-de-guerra/.nuget/NuGet/NuGet.Config"
+          "/home/matheus/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
@@ -36,9 +36,9 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "all"
+          "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.100"
+        "SdkAnalysisLevel": "9.0.200"
       },
       "frameworks": {
         "net9.0": {
@@ -82,6 +82,10 @@
               "target": "Package",
               "version": "[9.0.3, )"
             },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.8.31, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[7.2.0, )"
@@ -110,7 +114,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/maquina-de-guerra/.dotnet/sdk/9.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/home/matheus/.local/share/mise/installs/dotnet/9.0.203/sdk/9.0.203/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
