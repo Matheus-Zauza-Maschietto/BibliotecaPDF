@@ -17,7 +17,7 @@ public static class ConnectionsConfigure
 
     public static void ConfigureRedisConnection(this IServiceCollection services, ConfigurationManager configuration)
     {
-        services.AddSingleton<ConnectionMultiplexer>(options =>
+        services.AddSingleton<IConnectionMultiplexer>(options =>
         {
             var redisConfiguration = ConfigurationOptions.Parse(configuration.GetConnectionString("RedisConnection"), true);
             redisConfiguration.AbortOnConnectFail = false;
